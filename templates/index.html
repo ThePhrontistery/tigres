@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1 hx-get="/api/ping" hx-trigger="load" hx-swap="outerHTML">
+      Loading...
+  </h1>
+{% endblock %}
