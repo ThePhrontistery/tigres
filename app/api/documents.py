@@ -4,6 +4,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import status
 import os
+from app.services.vector_store import ingest_document
+import aiofiles
+from pathlib import Path
+from datetime import datetime
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -31,10 +35,25 @@ async def upload_documents(
     category: str = Form(...),
     description: str = Form("")
 ):
-    # Esqueleto: aquí se procesarían los archivos
-    # Por ahora solo cierra el modal y muestra mensaje de éxito
+    upload_dir = Path("uploaded_docs")
+    upload_dir.mkdir(exist_ok=True)
+    for file in files:
+        file_path = upload_dir / file.filename
+        async with aiofiles.open(file_path, "wb") as out_file:
+            content = await file.read()
+            await out_file.write(content)
+        # Extraer texto (asumimos txt para demo, para otros tipos usar extractor adecuado)
+        text = content.decode("utf-8", errors="ignore")
+        await ingest_document(
+            text=text,
+            file_name=file.filename,
+            file_path=str(file_path),
+            categoria=category,
+            descripcion=description,
+            proyecto="demo_metasketch",
+        )
     return HTMLResponse(
-        '<div class="p-4 text-green-700">Documentos subidos correctamente.</div>',
+        '<div class="p-4 text-green-700">Documentos subidos e indexados correctamente.</div>',
         status_code=202
     )
 
