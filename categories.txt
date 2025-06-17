@@ -1,0 +1,7 @@
+General
+requerimientos
+guia de estilos
+base de datos
+front end
+backend
+alcance

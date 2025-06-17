@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+  <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Iniciar sesión</h1>
+    {% if error %}
+      <div class="mb-4 text-red-600">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/login" class="space-y-4">
+      <div>
+        <label class="block text-gray-700">Usuario</label>
+        <input name="username" type="text" required class="mt-1 block w-full border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+      </div>
+      <div>
+        <label class="block text-gray-700">Contraseña</label>
+        <input name="password" type="password" required class="mt-1 block w-full border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300" />
+      </div>
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Entrar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

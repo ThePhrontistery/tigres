@@ -1,0 +1,17 @@
+"""App configuration loaded from environment variables."""
+from dotenv import load_dotenv
+import os
+from pydantic import BaseModel
+
+load_dotenv()
+
+class Settings(BaseModel):
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./metasketch.db")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "supersecretkey")
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    AZURE_OPENAI_API_KEY: str = os.getenv("AZURE_OPENAI_API_KEY", "")
+    AZURE_OPENAI_ENDPOINT: str = os.getenv("AZURE_OPENAI_ENDPOINT", "")
+    AZURE_OPENAI_DEPLOYMENT_NAME: str = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "")
+
+settings = Settings()

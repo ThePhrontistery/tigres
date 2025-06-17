@@ -1,20 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>{{ title or "AI Web Template" }}</title>
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{{ title }}</title>
+    <script>
+      tailwind.config = {
+        plugins: [tailwindcss.typography],
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: '#2563eb', // azul amigable
+                light: '#3b82f6',
+                dark: '#1e40af',
+              },
+              text: {
+                DEFAULT: '#1e3a8a', // azul amigable para texto
+              },
+            },
+          },
+        },
+      }
+    </script>
+    <!-- Tailwind CSS CDN con plugin Typography -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   </head>
-  <body class="bg-gradient-to-br from-slate-100 to-blue-100 min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-xl bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
+  <body class="bg-gradient-to-br from-slate-100 to-blue-100 min-h-screen flex items-center justify-center text-text">
+    <div class="w-full max-w-[95vw] bg-white rounded-2xl shadow-xl p-8 border border-slate-200">
       <header class="mb-6 text-center">
-        <h1 class="text-3xl font-bold text-blue-700 drop-shadow-sm">
-          {{ title or "AI Web Template" }}
+        <h1 class="text-3xl font-bold text-primary drop-shadow-sm">
+          {{ title }}
         </h1>
       </header>
       <main>

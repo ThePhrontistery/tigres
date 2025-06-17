@@ -1,0 +1,20 @@
+<div id="markdown-editor-panel">
+  <h2 class="font-semibold mb-2">Editor Markdown</h2>
+  <form id="markdown-form" class="flex flex-col gap-2">
+    <textarea 
+      id="markdown-input"
+      name="markdown"
+      rows="10"
+      class="w-full border rounded px-2 py-1 font-mono"
+      placeholder="Escribe tu texto en Markdown aquí..."
+      hx-post="/api/markdown/preview"
+      hx-trigger="keyup changed delay:300ms"
+      hx-target="#markdown-preview"
+      hx-swap="innerHTML"
+    >{{ markdown if markdown is defined else "" }}</textarea>
+  </form>
+  <div class="mt-4">
+    <h3 class="font-medium mb-1">Vista previa:</h3>
+    <div id="markdown-preview" class="prose bg-gray-50 p-2 rounded border">{{ preview|safe if preview is defined else "" }}</div>
+  </div>
+</div>

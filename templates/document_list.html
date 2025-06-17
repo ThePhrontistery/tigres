@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div id="document-list-panel">
+  <ul id="documents-list" class="mb-4">
+    <!-- Lista vacía inicialmente -->
+    <li class="text-gray-400">No hay documentos subidos.</li>
+  </ul>
+  <button 
+    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    hx-get="/documents/upload-modal" 
+    hx-target="#modal-container" 
+    hx-swap="innerHTML">
+    Subir documentos
+  </button>
+</div>
+<div id="modal-container"></div>
+{% endblock %}

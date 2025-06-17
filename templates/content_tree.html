@@ -1,0 +1,29 @@
+<div id="content-tree-panel">
+  <h2 class="font-semibold mb-2">Árbol de Contenidos</h2>
+  <ul class="pl-2">
+    {% for node in tree %}
+      <li class="mb-1">
+        <button class="font-bold text-blue-700 hover:underline" 
+                hx-get="/content-tree/section?title={{ node.title | urlencode }}"
+                hx-target="#markdown-panel"
+                hx-swap="innerHTML">
+          {{ node.title }}
+        </button>
+        {% if node.children %}
+          <ul class="pl-4 border-l border-blue-200 ml-2">
+            {% for child in node.children %}
+              <li class="mb-1">
+                <button class="text-blue-800 hover:underline" 
+                        hx-get="/content-tree/section?title={{ child.title | urlencode }}"
+                        hx-target="#markdown-panel"
+                        hx-swap="innerHTML">
+                  {{ child.title }}
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
