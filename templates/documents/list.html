@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-2xl mx-auto mt-8 p-4 bg-white rounded shadow">
+  <h2 class="text-xl font-bold mb-4">Lista de Documentos</h2>
+  <ul id="document-list" class="mb-4 space-y-2">
+    <!-- Documentos se listarán aquí -->
+  </ul>
+  <button id="open-upload-modal" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Select</button>
+  <div id="delete-confirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+    <div class="bg-white p-6 rounded shadow-lg w-80">
+      <h3 class="text-lg font-semibold mb-4 text-red-600">¿Seguro que quieres borrar este documento?</h3>
+      <div class="flex justify-end space-x-2">
+        <button id="cancel-delete" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+        <button id="confirm-delete" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Borrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de subida -->
+<div id="upload-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+  <div class="bg-white p-6 rounded shadow-lg w-80">
+    <h3 class="text-lg font-semibold mb-4">Subir Documentos</h3>
+    <input id="file-input" type="file" multiple class="mb-4 block w-full" />
+    <div class="flex justify-end space-x-2">
+      <button id="close-modal" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cerrar</button>
+      <button id="upload-files" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Upload</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const openModalBtn = document.getElementById('open-upload-modal');
+  const modal = document.getElementById('upload-modal');
+  const closeModalBtn = document.getElementById('close-modal');
+  openModalBtn.onclick = () => modal.classList.remove('hidden');
+  closeModalBtn.onclick = () => modal.classList.add('hidden');
+
+  // Confirmación de borrado
+  let fileToDelete = null;
+  const confirmModal = document.getElementById('delete-confirm');
+  const cancelDeleteBtn = document.getElementById('cancel-delete');
+  const confirmDeleteBtn = document.getElementById('confirm-delete');
+
+  async function loadDocuments() {
+    const res = await fetch('/api/documents/list');
+    const docs = await res.json();
+    const list = document.getElementById('document-list');
+    list.innerHTML = '';
+    if (docs.length === 0) {
+      list.innerHTML = '<li class="text-gray-400">No hay documentos subidos.</li>';
+    } else {
+      docs.forEach(doc => {
+        list.innerHTML += `<li class='border rounded px-2 py-1 flex items-center justify-between'>
+          <span>${doc}</span>
+          <button onclick="showDeleteConfirm('${doc}')" class='ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs'>Borrar</button>
+        </li>`;
+      });
+    }
+  }
+  loadDocuments();
+
+  window.showDeleteConfirm = function(filename) {
+    fileToDelete = filename;
+    confirmModal.classList.remove('hidden');
+  };
+  cancelDeleteBtn.onclick = () => {
+    fileToDelete = null;
+    confirmModal.classList.add('hidden');
+  };
+  confirmDeleteBtn.onclick = async () => {
+    if (!fileToDelete) return;
+    await fetch(`/api/documents/${fileToDelete}`, { method: 'DELETE' });
+    fileToDelete = null;
+    confirmModal.classList.add('hidden');
+    await loadDocuments();
+  };
+
+  document.getElementById('upload-files').onclick = async () => {
+    const input = document.getElementById('file-input');
+    if (!input.files.length) return;
+    const formData = new FormData();
+    for (const file of input.files) formData.append('files', file);
+    await fetch('/api/upload', { method: 'POST', body: formData });
+    modal.classList.add('hidden');
+    await loadDocuments();
+  };
+</script>
+{% endblock %}

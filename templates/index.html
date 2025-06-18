@@ -1,7 +1,156 @@
 {% extends "base.html" %}
-
 {% block content %}
-  <h1 hx-get="/api/ping" hx-trigger="load" hx-swap="outerHTML">
-      Loading...
-  </h1>
+<div class="w-screen h-screen min-h-screen min-w-full bg-slate-100 flex flex-col">
+  <header class="w-full mb-2">
+    <h1 class="text-4xl font-bold text-blue-700 text-center py-6 bg-white shadow">Metasketch</h1>
+  </header>
+  <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
+    <!-- Columna 1: Documentos -->
+    <section class="bg-white rounded shadow p-4 flex flex-col h-full">
+      <h2 class="text-lg font-bold mb-4">Lista de Documentos</h2>
+      <ul id="document-list" class="mb-4 space-y-2 flex-1 overflow-y-auto"></ul>
+      <button id="open-upload-modal" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Select</button>
+      <div id="delete-confirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+        <div class="bg-white p-6 rounded shadow-lg w-80">
+          <h3 class="text-lg font-semibold mb-4 text-red-600">¿Seguro que quieres borrar este documento?</h3>
+          <div class="flex justify-end space-x-2">
+            <button id="cancel-delete" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
+            <button id="confirm-delete" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Borrar</button>
+          </div>
+        </div>
+      </div>
+      <!-- Modal de subida -->
+      <div id="upload-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+        <div class="bg-white p-6 rounded shadow-lg w-80">
+          <h3 class="text-lg font-semibold mb-4">Subir Documentos</h3>
+          <input id="file-input" type="file" multiple class="mb-4 block w-full" />
+          <div class="flex justify-end space-x-2">
+            <button id="close-modal" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cerrar</button>
+            <button id="upload-files" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Upload</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Columna 2: Árbol de Contenidos -->
+    <section class="bg-white rounded shadow p-4 h-full overflow-y-auto">
+      <h2 class="text-lg font-bold mb-4">Árbol de Contenidos</h2>
+      <ul class="pl-4 border-l-2 border-gray-300">
+        <li class="mb-2">
+          <span class="font-semibold">1. Introducción</span>
+          <ul class="pl-4 list-disc">
+            <li>1.1 Objetivo</li>
+            <li>1.2 Alcance</li>
+          </ul>
+        </li>
+        <li class="mb-2">
+          <span class="font-semibold">2. Requerimientos</span>
+          <ul class="pl-4 list-disc">
+            <li>2.1 Funcionales</li>
+            <li>2.2 No Funcionales</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Columna 3: Editor Markdown -->
+    <section class="bg-white rounded shadow p-4 flex flex-col h-full">
+      <h2 class="text-lg font-bold mb-4">Editor Markdown</h2>
+      <textarea id="markdown-input" class="w-full h-1/2 min-h-[120px] max-h-[200px] p-2 border rounded focus:outline-none focus:ring mb-2" placeholder="Escribe en Markdown..."></textarea>
+      <div class="w-full flex-1 p-2 border rounded bg-gray-50 overflow-auto">
+        <div id="markdown-preview" class="prose prose-sm"></div>
+      </div>
+    </section>
+
+    <!-- Columna 4: ChatBot IA -->
+    <section class="bg-white rounded shadow p-4 flex flex-col h-full">
+      <h2 class="text-lg font-bold mb-4">ChatBot IA</h2>
+      <div id="chat-messages" class="flex-1 h-48 overflow-y-auto bg-gray-50 p-2 rounded border mb-2"></div>
+      <form id="chat-form" class="flex gap-2 mt-2">
+        <input id="chat-input" type="text" class="flex-1 border rounded p-2" placeholder="Escribe tu mensaje..." required />
+        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar</button>
+      </form>
+    </section>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+// Panel Documentos
+const openModalBtn = document.getElementById('open-upload-modal');
+const modal = document.getElementById('upload-modal');
+const closeModalBtn = document.getElementById('close-modal');
+openModalBtn.onclick = () => modal.classList.remove('hidden');
+closeModalBtn.onclick = () => modal.classList.add('hidden');
+
+let fileToDelete = null;
+const confirmModal = document.getElementById('delete-confirm');
+const cancelDeleteBtn = document.getElementById('cancel-delete');
+const confirmDeleteBtn = document.getElementById('confirm-delete');
+
+async function loadDocuments() {
+  const res = await fetch('/api/documents/list');
+  const docs = await res.json();
+  const list = document.getElementById('document-list');
+  list.innerHTML = '';
+  if (docs.length === 0) {
+    list.innerHTML = '<li class="text-gray-400">No hay documentos subidos.</li>';
+  } else {
+    docs.forEach(doc => {
+      list.innerHTML += `<li class='border rounded px-2 py-1 flex items-center justify-between'>
+        <span>${doc}</span>
+        <button onclick="showDeleteConfirm('${doc}')" class='ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs'>Borrar</button>
+      </li>`;
+    });
+  }
+}
+loadDocuments();
+
+window.showDeleteConfirm = function(filename) {
+  fileToDelete = filename;
+  confirmModal.classList.remove('hidden');
+};
+cancelDeleteBtn.onclick = () => {
+  fileToDelete = null;
+  confirmModal.classList.add('hidden');
+};
+confirmDeleteBtn.onclick = async () => {
+  if (!fileToDelete) return;
+  await fetch(`/api/documents/${fileToDelete}`, { method: 'DELETE' });
+  fileToDelete = null;
+  confirmModal.classList.add('hidden');
+  await loadDocuments();
+};
+document.getElementById('upload-files').onclick = async () => {
+  const input = document.getElementById('file-input');
+  if (!input.files.length) return;
+  const formData = new FormData();
+  for (const file of input.files) formData.append('files', file);
+  await fetch('/api/upload', { method: 'POST', body: formData });
+  modal.classList.add('hidden');
+  await loadDocuments();
+};
+// Panel Markdown
+const input = document.getElementById('markdown-input');
+const preview = document.getElementById('markdown-preview');
+input.addEventListener('input', () => {
+  preview.innerHTML = window.marked.parse(input.value);
+});
+// Panel ChatBot
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+chatForm.onsubmit = async (e) => {
+  e.preventDefault();
+  const msg = chatInput.value.trim();
+  if (!msg) return;
+  chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
+  chatInput.value = '';
+  chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
+  setTimeout(() => {
+    chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Esta es una respuesta simulada.');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }, 1000);
+};
+</script>
 {% endblock %}

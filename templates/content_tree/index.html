@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-xl mx-auto mt-8 p-4 bg-white rounded shadow">
+  <h2 class="text-xl font-bold mb-4">Árbol de Contenidos</h2>
+  <ul class="pl-4 border-l-2 border-gray-300">
+    <li class="mb-2">
+      <span class="font-semibold">1. Introducción</span>
+      <ul class="pl-4 list-disc">
+        <li>1.1 Objetivo</li>
+        <li>1.2 Alcance</li>
+      </ul>
+    </li>
+    <li class="mb-2">
+      <span class="font-semibold">2. Requerimientos</span>
+      <ul class="pl-4 list-disc">
+        <li>2.1 Funcionales</li>
+        <li>2.2 No Funcionales</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+{% endblock %}
