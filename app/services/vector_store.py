@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Optional
 from app.config import settings
 from langchain_core.documents import Document
-from langchain_community.vectorstores.chroma import Chroma
+from langchain_chroma import Chroma
 from langchain_community.document_loaders import TextLoader,PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import AzureOpenAIEmbeddings
@@ -35,7 +35,7 @@ async def ingest_document(
         loader=PyPDFLoader(file_path)
     else:
         loader=TextLoader(file_path)
-        
+
     docs=loader.load()
 
     for doc in docs:
@@ -49,7 +49,7 @@ async def ingest_document(
             "descripcion": descripcion,
         }
     
-    print(f"Docs cargados: {len(docs)}: {docs}")    
+    print(f"Docs cargados: {len(docs)}")    
     final_documents=splitter.split_documents(docs)
     
     # Metadatos
@@ -157,12 +157,10 @@ async def delete_documento(file_name: str) -> bool:
     docs = db.similarity_search("", k=10000)
     files_to_delete = []
     for doc in docs:
-        print(f"Doc: {doc}")
         meta = doc.metadata if hasattr(doc, 'metadata') else {}
-        print(f"Meta: {meta}")
         if meta and meta.get("file_name") == file_name :
             files_to_delete.append(meta["file_name"])
-    print(f"files a eliminar: {files_to_delete}")
+
     if not files_to_delete:
         return False
     

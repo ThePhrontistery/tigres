@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 <div id="document-list-panel">
+  {% if deleted_message %}
+    <div class="p-2 mb-2 bg-green-100 text-green-800 rounded text-center animate-fade-in">{{ deleted_message }}</div>
+  {% endif %}
+  {% if message %}
+    <div id="modal-success" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs text-center animate-fade-in">
+        <div class="text-green-700 text-lg font-semibold mb-2">{{ message }}</div>
+        <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onclick="document.getElementById('modal-success').remove()">Cerrar</button>
+      </div>
+    </div>
+  {% endif %}
   <ul id="documents-list" class="mb-4">
     {% if documents and documents|length > 0 %}
       {% for doc in documents %}
@@ -16,10 +27,11 @@
             </button>
             <button 
               class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded"
-              hx-delete="/api/vector/document?file_name={{ doc.file_name }}"
+              hx-delete="/api/documents/delete?file_name={{ doc.file_name }}"
               hx-target="#document-list-panel"
               hx-swap="outerHTML"
-              hx-confirm="¿Seguro que deseas eliminar este documento?">
+              hx-confirm="¿Seguro que deseas eliminar este documento?"
+              hx-vals='{"show_message": true}'>
               Eliminar
             </button>
             <a 
@@ -46,4 +58,8 @@
 </div>
 <div id="modal-container"></div>
 <div id="document-detail-modal"></div>
+<style>
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.animate-fade-in { animation: fade-in 0.2s; }
+</style>
 {% endblock %}

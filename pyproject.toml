@@ -26,6 +26,7 @@ dependencies = [
     "langchain_openai>=0.1.6",
     "chromadb>=0.4.24",
     "pypdf>=4.2.0",
+    "langchain-chroma>=0.0.8",
 ]
 
 [tool.ruff]
