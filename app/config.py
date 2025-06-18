@@ -6,7 +6,9 @@ from pydantic import BaseModel
 load_dotenv()
 
 class Settings(BaseModel):
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./metasketch.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
+    VECTOR_DATABASE_URL: str = os.getenv("VECTOR_DATABASE_URL", "sqlite+aiosqlite:///./metasketch.db")
+    VECTOR_DATABASE_TABLE: str = os.getenv("VECTOR_DATABASE_TABLE", "document_vectors")
     SECRET_KEY: str = os.getenv("SECRET_KEY", "supersecretkey")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60

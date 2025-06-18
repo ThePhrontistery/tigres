@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import status
 import os
-from app.services.vector_store import ingest_document
+from app.services.vector_store import ingest_document, get_proyect_documents, get_documento
 import aiofiles
 from pathlib import Path
 from datetime import datetime
@@ -59,4 +59,16 @@ async def upload_documents(
 
 @router.get("/documents/list", response_class=HTMLResponse)
 async def document_list(request: Request):
-    return templates.TemplateResponse("document_list.html", {"request": request})
+    # Por ahora, proyecto fijo demo_metasketch
+    documents = get_proyect_documents("demo_metasketch")
+    return templates.TemplateResponse("document_list.html", {"request": request, "documents": documents})
+
+@router.get("/documents/view", response_class=HTMLResponse)
+async def view_document(request: Request, file_name: str):
+    """Renderiza los detalles y vista previa de un documento."""
+    doc_list = get_documento(file_name)
+    document = doc_list[0] if doc_list else None
+    return templates.TemplateResponse(
+        "document_detail.html",
+        {"request": request, "document": document}
+    )

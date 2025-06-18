@@ -2,8 +2,39 @@
 {% block content %}
 <div id="document-list-panel">
   <ul id="documents-list" class="mb-4">
-    <!-- Lista vacía inicialmente -->
-    <li class="text-gray-400">No hay documentos subidos.</li>
+    {% if documents and documents|length > 0 %}
+      {% for doc in documents %}
+        <li class="flex items-center justify-between text-blue-800 border-b py-1">
+          <span>{{ doc.file_name }}</span>
+          <div class="flex gap-2">
+            <button 
+              class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded"
+              hx-get="/documents/view?file_name={{ doc.file_name }}"
+              hx-target="#document-detail-modal"
+              hx-swap="innerHTML">
+              Ver
+            </button>
+            <button 
+              class="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded"
+              hx-delete="/api/vector/document?file_name={{ doc.file_name }}"
+              hx-target="#document-list-panel"
+              hx-swap="outerHTML"
+              hx-confirm="¿Seguro que deseas eliminar este documento?">
+              Eliminar
+            </button>
+            <a 
+              class="text-xs bg-green-100 hover:bg-green-200 text-green-800 px-2 py-1 rounded"
+              href="/api/documents/download?file_name={{ doc.file_name }}"
+              target="_blank"
+              download>
+              Descargar
+            </a>
+          </div>
+        </li>
+      {% endfor %}
+    {% else %}
+      <li class="text-gray-400">No hay documentos subidos.</li>
+    {% endif %}
   </ul>
   <button 
     class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -14,4 +45,5 @@
   </button>
 </div>
 <div id="modal-container"></div>
+<div id="document-detail-modal"></div>
 {% endblock %}
