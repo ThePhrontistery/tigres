@@ -13,6 +13,7 @@ USERS = {
     "santiago": "1234",
     "ana": "4567",
     "luz": "7890",
+    "admin": "1234",
 }
 
 @router.get("/auth/login", response_class=HTMLResponse)
