@@ -8,10 +8,11 @@
       class="w-full border rounded px-2 py-1 font-mono"
       placeholder="Escribe tu texto en Markdown aquí..."
       hx-post="/api/markdown/preview"
-      hx-trigger="keyup changed delay:300ms"
+      hx-trigger="keyup changed delay:300ms, load"
       hx-target="#markdown-preview"
       hx-swap="innerHTML"
     >{{ markdown if markdown is defined else "" }}</textarea>
+    <button type="button" class="self-end bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mt-2">Aplicar</button>
   </form>
   <div class="mt-4">
     <h3 class="font-medium mb-1">Vista previa:</h3>

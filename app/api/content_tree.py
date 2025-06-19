@@ -45,22 +45,15 @@ def parse_markdown_headings(md_text: str, max_depth: int = 2) -> List[dict]:
     return tree
 
 def extract_section(md_text: str, title: str) -> str:
-    """Extrae el contenido de la sección o subsección indicada por el título."""
+    """Extrae el contenido de la sección indicada por el título y todo el contenido posterior."""
     lines = md_text.splitlines()
     capture = False
     section_lines = []
-    section_level = None
     for line in lines:
         if line.strip().startswith("#"):
-            # Detecta nivel y título
             hashes, _, heading = line.partition(" ")
             if heading.strip() == title.strip():
                 capture = True
-                section_level = len(hashes)
-                section_lines.append(line)
-                continue
-            if capture and len(hashes) <= (section_level or 1):
-                break
-        elif capture:
+        if capture:
             section_lines.append(line)
     return "\n".join(section_lines).strip()
