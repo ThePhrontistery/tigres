@@ -1,0 +1,27 @@
+Prompts 2:  Visual Code
+R (Role) Quiero que actúes como un Desarrollador web en creación de prototipos para una plataforma colaborativa.
+I (Instruction) Tu tarea es generar en una pagina web la funcionalidad que te indico:
+La pantalla principal de la aplicación "Metasketch" debe contener 4 pantallas independientes en funcionalidad, pero relacionadas entre si.
+Las funcionalidades asociadas a cada una de ellas son:
+**Panel de carga de Documentos
+**Árbol de Contenidos (Indice y enlaces)
+**Documento Funcional. Editor Markdown con previsualización
+**Chat IA
+la pantalla debe tener 4 columnas de la siguiente forma: Primer columna de la izquierda--> Lista de Documentos, Segunda Columna --> Conent_tree, Tercera Columna--> Editor Markdown con previsualizacion junto abajo y por ultimo cuarta columna ChatBot IA
+Crea una nueva pantalla "lista de Documentos" con la siguiente funcionalidad:
+La pantalla mostrará una lista de documentos, estará inicialmente vacía.
+Al lado de la lista existirá un botón para subir ficheros, llamado "select".
+Si pulsas el botón upload se mostrará una ventana modal para seleccionar en una ruta de red los ficheros ó fichero a subir. En esta misma pantalla existe un botón cerrar que permitirá el cierre de la ventana modal, y el botón upload que permitirá subir los ficheros seleccionados. Y un botón Borrar que permita el borrado de los mismos.   
+También es necesario generar el fichero plantilla.txt con los siguientes valores: Introduction, Overall Description, Documentación, Styles, Requeriments
+Crea una nueva pantalla "content_tree" que representara el índice del documento funcional como un árbol de contenido.
+El árbol mostrará los diferentes niveles, hasta un máximo de 2.  
+Crea una nueva pantalla "markdown_editor" que implemente  la funcionalidad de editor de texto en formato markdown.
+Crea una pantalla ChatBot IA para interactuar con la IA
+ 
+S (Specific needs)
+Cosideraciones Técnicas en ficheros readme.md y copilot-instructions.md)
+Simplicidad y claridad visual: La pantalla debe ser muy básica y fácil de entender.
+Sin frameworks complicados: No usar frameworks complicados ni integraciones externas.
+Formato del contenido: El contenido de la plataforma colaborativa debe mostrarse con formato HTML
+E (Expected outcome) Necesito que generes el código fuente completo, incluyendo HTML, CSS y JavaScript, y que proporciones instrucciones claras sobre cómo ejecutar el prototipo en local.
+N (Next step) Cuando termines el código, añade una breve recomendación final con consejos para organizar el trabajo del equipo de forma sencilla y práctica, dado su bajo nivel técnico.
