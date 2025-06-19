@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-xl mx-auto mt-8 p-4 bg-white rounded shadow">
+  <h2 class="text-xl font-bold mb-4">ChatBot IA</h2>
+  <div class="flex flex-col gap-2">
+    <div id="chat-messages" class="h-48 overflow-y-auto bg-gray-50 p-2 rounded border mb-2"></div>
+    <form id="chat-form" class="flex gap-2">
+      <input id="chat-input" type="text" class="flex-1 border rounded p-2" placeholder="Escribe tu mensaje..." required />
+      <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar</button>
+    </form>
+  </div>
+</div>
+<script>
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const chatMessages = document.getElementById('chat-messages');
+  chatForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+    chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
+    chatInput.value = '';
+    // Simulación de respuesta IA
+    chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
+    setTimeout(() => {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Esta es una respuesta simulada.');
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 1000);
+  };
+</script>
+{% endblock %}

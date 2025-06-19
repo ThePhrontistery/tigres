@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex min-h-screen items-center justify-center bg-gray-100">
+  <div class="w-full max-w-md p-8 space-y-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold text-center">Iniciar sesión</h2>
+    {% if error %}
+      <div class="mb-4 text-red-600 text-center">{{ error }}</div>
+    {% endif %}
+    <form hx-post="/api/auth/login" hx-target="body" hx-swap="outerHTML" method="post" class="space-y-4">
+      <div>
+        <label for="username" class="block text-sm font-medium">Usuario</label>
+        <input id="username" name="username" type="text" required class="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" autocomplete="username" />
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium">Contraseña</label>
+        <input id="password" name="password" type="password" required class="mt-1 w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" autocomplete="current-password" />
+      </div>
+      <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700">Iniciar sesión</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
