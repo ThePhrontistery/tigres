@@ -16,10 +16,13 @@ wheels/
 .DS_Store
 
 # Data files
-db/
-data/
+#db/
+#data/
 
 
 # Node js
 node_modules/
+
+
+static/uploads
     
