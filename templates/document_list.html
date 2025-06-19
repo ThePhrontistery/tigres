@@ -48,13 +48,22 @@
       <li class="text-gray-400">No hay documentos subidos.</li>
     {% endif %}
   </ul>
-  <button 
-    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-    hx-get="/documents/upload-modal" 
-    hx-target="#modal-container" 
-    hx-swap="innerHTML">
-    Subir documentos
-  </button>
+  <div class="flex gap-2 mt-2">
+    <button 
+      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+      hx-get="/documents/upload-modal" 
+      hx-target="#modal-container" 
+      hx-swap="innerHTML">
+      Subir documentos
+    </button>
+    <button 
+      class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+      id="generar-funcional-btn"
+      type="button"
+      title="Generar documento funcional a partir de los documentos subidos">
+      Generar Funcional
+    </button>
+  </div>
 </div>
 <div id="modal-container"></div>
 <div id="document-detail-modal"></div>

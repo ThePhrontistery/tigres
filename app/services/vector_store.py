@@ -4,7 +4,7 @@ from typing import List, Optional
 from app.config import settings
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import TextLoader,PyPDFLoader
+from langchain_community.document_loaders import TextLoader,PyPDFLoader, UnstructuredWordDocumentLoader, UnstructuredPowerPointLoader, UnstructuredExcelLoader, UnstructuredMarkdownLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_openai import AzureOpenAIEmbeddings
 import sqlite3
@@ -30,9 +30,17 @@ async def ingest_document(
         chunk_size=settings.SPLITTER_CHUNK_SIZE,
         chunk_overlap=settings.SPLITTER_CHUNK_OVERLAP_DOC,
     )
-    
+
     if file_name.endswith(".pdf"):
         loader=PyPDFLoader(file_path)
+    elif file_name.endswith(".docx"):
+        loader=UnstructuredWordDocumentLoader(file_path, encoding="utf-8")
+    elif file_name.endswith(".pptx"):
+        loader=UnstructuredPowerPointLoader(file_path, encoding="utf-8")
+    elif file_name.endswith(".xlsx"):
+        loader=UnstructuredExcelLoader(file_path, encoding="utf-8")
+    elif file_name.endswith(".md"):
+        loader=UnstructuredMarkdownLoader(file_path, encoding="utf-8")
     else:
         loader=TextLoader(file_path)
 
@@ -75,60 +83,84 @@ async def ingest_document(
 
 # Obtener lista de proyectos únicos
 def get_proyects() -> list[str]:
+    """
+    Obtiene la lista ordenada y única de proyectos almacenados en el vector store.
+
+    Returns:
+        list[str]: Lista de nombres de proyectos.
+    """
     embeddings = AzureOpenAIEmbeddings(model=settings.AZURE_OPENAI_EMBEDDING_MODEL)
     db = Chroma(
         persist_directory=VECTOR_DB_PATH,
         collection_name=VECTOR_DATABASE_TABLE,
         embedding_function=embeddings,
     )
-    # Recuperar todos los metadatos de los documentos
-    metadatas = [doc.metadata for doc in db.similarity_search("", k=10000)]
-    proyectos = set()
-    for meta in metadatas:
+    # Obtener solo los metadatos de todos los documentos
+    results = db.get(include=["metadatas"])
+    proyectos: set[str] = set()
+    for meta in results.get("metadatas", []):
         if meta and "proyecto" in meta and meta["proyecto"]:
             proyectos.add(meta["proyecto"])
     return sorted(proyectos)
 
 
-# Obtener lista de documentos de un proyecto
 def get_proyect_documents(proyecto: str) -> list[dict]:
+    """
+    Retrieve all unique documents for a given project from the vector store.
+
+    Args:
+        proyecto: Project identifier.
+
+    Returns:
+        List of dicts with file name and metadata (no duplicate file_names).
+    """
     embeddings = AzureOpenAIEmbeddings(model=settings.AZURE_OPENAI_EMBEDDING_MODEL)
     db = Chroma(
         persist_directory=VECTOR_DB_PATH,
         collection_name=VECTOR_DATABASE_TABLE,
         embedding_function=embeddings,
     )
-   
+
+    results = db.get(where={"proyecto": proyecto})
+    seen_files: set[str] = set()
     project_docs: list[dict] = []
-    for doc in db.similarity_search("", k=10000):
-        meta = doc.metadata
-        if meta and "proyecto" in meta and meta["proyecto"]:
-            project_doc = {            
-                "file_name": meta["file_name"],            
+    for meta in results.get("metadatas", []):
+        file_name = meta.get("file_name")
+        if file_name and file_name not in seen_files:
+            seen_files.add(file_name)
+            project_docs.append({
+                "file_name": file_name,
                 "metadata": meta,
-            }
-            project_docs.append(project_doc)
-    
+            })
+
     return project_docs
 
-# Obtener el documento con su contenido y metadatos
-def get_documento(file_name: str) -> list[dict]:
+from typing import Any
+
+def get_documento(file_name: str) -> list[dict[str, Any]]:
+    """
+    Devuelve los documentos asociados a un archivo específico usando filtro en el vector store.
+    """
     embeddings = AzureOpenAIEmbeddings(model=settings.AZURE_OPENAI_EMBEDDING_MODEL)
     db = Chroma(
         persist_directory=VECTOR_DB_PATH,
         collection_name=VECTOR_DATABASE_TABLE,
         embedding_function=embeddings,
     )
-    docs = db.similarity_search("", k=10000)
-    result = []
-    for doc in docs:
-        meta = doc.metadata if hasattr(doc, 'metadata') else {}
-        if meta and meta.get("file_name") == file_name:
-            result.append({
-                "text": doc.page_content,
-                **meta,
-            })
-    return result
+    # Usar filtro para traer solo los documentos con ese file_name
+    docs = db.similarity_search(
+        query="",  # o algún texto relevante si buscas por similitud
+        k=1000,    # ajusta según lo esperado
+        filter={"file_name": file_name}
+    )
+    return [
+        {
+            "text": doc.page_content,
+            **doc.metadata,
+        }
+        for doc in docs
+        if doc.metadata  # opcional: asegura que metadata existe
+    ]
 
 async def query_similar_chunks(query: str, top_k: int = 5) -> list[dict]:
     embeddings = AzureOpenAIEmbeddings(model=settings.AZURE_OPENAI_EMBEDDING_MODEL)
@@ -148,25 +180,27 @@ async def query_similar_chunks(query: str, top_k: int = 5) -> list[dict]:
     return results
 
 async def delete_documento(file_name: str) -> bool:
+    """
+    Elimina todos los documentos asociados a un archivo específico del vector store.
+
+    Args:
+        file_name: Nombre del archivo cuyos documentos se eliminarán.
+
+    Returns:
+        bool: True si se eliminaron documentos, False si no se encontró ninguno.
+    """
     embeddings = AzureOpenAIEmbeddings(model=settings.AZURE_OPENAI_EMBEDDING_MODEL)
     db = Chroma(
         persist_directory=VECTOR_DB_PATH,
         collection_name=VECTOR_DATABASE_TABLE,
         embedding_function=embeddings,
     )
-    docs = db.similarity_search("", k=10000)
-    files_to_delete = []
-    for doc in docs:
-        meta = doc.metadata if hasattr(doc, 'metadata') else {}
-        if meta and meta.get("file_name") == file_name :
-            files_to_delete.append(meta["file_name"])
 
-    if not files_to_delete:
+    # Buscar documentos con ese file_name usando filtro
+    docs = db.get(where={"file_name": file_name})
+    if not docs.get("ids"):
         return False
-    
-    # Eliminar directamente de la tabla SQL
-    # Eliminar documentos de la base vectorial por file_name en metadatos
-    result = db._collection.delete(where={"file_name": {"$in": files_to_delete}})
-    print(f"Resultado de la eliminación: {result}")
-    
+
+    # Eliminar por filtro (más eficiente y seguro)
+    db.delete(where={"file_name": file_name})
     return True
