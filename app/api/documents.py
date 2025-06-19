@@ -15,7 +15,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 documents_cache: List[str] = []
 
 @router.get("/documents/list", response_class=JSONResponse)
-def get_documents_list() -> List[str]:
+async def get_documents_list() -> list[str]:
     """Return the list of uploaded documents."""
     files = [f.name for f in UPLOAD_DIR.iterdir() if f.is_file()]
     return files
