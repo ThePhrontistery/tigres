@@ -11,6 +11,11 @@
     <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   </head>
   <body class="bg-gradient-to-br from-slate-100 to-blue-100 min-h-screen flex items-center justify-center">
+    <header class="absolute top-0 right-0 m-4">
+      {% if request.cookies.session == 'dummy-session-token' %}
+        <a href="/api/auth/logout" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Cerrar sesión</a>
+      {% endif %}
+    </header>
     <main class="w-full">
       {% block content %}{% endblock %}
     </main>
