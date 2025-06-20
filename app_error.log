@@ -1,0 +1,33 @@
+2025-06-20 12:18:31,649 ERROR Error generando el análisis funcional: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+TRACEBACK:
+Traceback (most recent call last):
+  File "C:\Users\AMARTI58\OneDrive - Capgemini\Desktop\tigres\app\api\documents.py", line 75, in sync_generate
+    return generate_funcional_analysis(files)
+  File "C:\Users\AMARTI58\OneDrive - Capgemini\Desktop\tigres\app\services\openai_service.py", line 49, in generate_funcional_analysis
+    response = openai.ChatCompletion.create(
+        engine=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+    ...<2 lines>...
+        max_tokens=2048,
+    )
+  File "C:\Users\AMARTI58\OneDrive - Capgemini\Desktop\tigres\.venv\Lib\site-packages\openai\lib\_old_api.py", line 39, in __call__
+    raise APIRemovedInV1(symbol=self._symbol)
+openai.lib._old_api.APIRemovedInV1: 
+
+You tried to access openai.ChatCompletion, but this is no longer supported in openai>=1.0.0 - see the README at https://github.com/openai/openai-python for the API.
+
+You can run `openai migrate` to automatically upgrade your codebase to use the 1.0.0 interface. 
+
+Alternatively, you can pin your installation to the old version, e.g. `pip install openai==0.28`
+
+A detailed migration guide is available here: https://github.com/openai/openai-python/discussions/742
+
+

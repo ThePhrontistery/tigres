@@ -10,6 +10,7 @@
       <h2 class="text-lg font-bold mb-4">Lista de Documentos</h2>
       <ul id="document-list" class="mb-4 space-y-2 flex-1 overflow-y-auto"></ul>
       <button id="open-upload-modal" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Select</button>
+      <button id="generate-funcional" class="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Generar Funcional</button>
       <div id="delete-confirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
         <div class="bg-white p-6 rounded shadow-lg w-80">
           <h3 class="text-lg font-semibold mb-4 text-red-600">¿Seguro que quieres borrar este documento?</h3>
@@ -56,9 +57,14 @@
     <!-- Columna 3: Editor Markdown -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
       <h2 class="text-lg font-bold mb-4">Editor Markdown</h2>
-      <textarea id="markdown-input" class="w-full h-1/2 min-h-[120px] max-h-[200px] p-2 border rounded focus:outline-none focus:ring mb-2" placeholder="Escribe en Markdown..."></textarea>
-      <div class="w-full flex-1 p-2 border rounded bg-gray-50 overflow-auto">
-        <div id="markdown-preview" class="prose prose-sm"></div>
+      <div class="flex flex-col flex-1 gap-2">
+        <textarea id="markdown-input" class="w-full flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded focus:outline-none focus:ring resize-none overflow-auto" placeholder="Escribe en Markdown..."></textarea>
+        <h2 class="text-lg font-bold mb-2">Previsualización</h2>
+        <div id="markdown-preview" class="prose flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded bg-gray-50 overflow-auto"></div>
+      </div>
+      <div class="flex gap-2 mt-4 justify-end">
+        <button id="update-funcional" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Actualizar</button>
+        <button id="export-funcional" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Exportar</button>
       </div>
     </section>
 
@@ -75,6 +81,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
 <script>
 // Panel Documentos
 const openModalBtn = document.getElementById('open-upload-modal');
@@ -134,7 +141,9 @@ document.getElementById('upload-files').onclick = async () => {
 const input = document.getElementById('markdown-input');
 const preview = document.getElementById('markdown-preview');
 input.addEventListener('input', () => {
-  preview.innerHTML = window.marked.parse(input.value);
+  // Usar marked para convertir markdown a HTML y DOMPurify para sanitizar
+  const rawHtml = window.marked.parse(input.value, { headerIds: false });
+  preview.innerHTML = DOMPurify.sanitize(rawHtml);
 });
 // Panel ChatBot
 const chatForm = document.getElementById('chat-form');
@@ -151,6 +160,83 @@ chatForm.onsubmit = async (e) => {
     chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Esta es una respuesta simulada.');
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }, 1000);
+};
+
+const generateBtn = document.getElementById('generate-funcional');
+const selectBtn = document.getElementById('open-upload-modal');
+const updateBtn = document.getElementById('update-funcional');
+const exportBtn = document.getElementById('export-funcional');
+
+// Deshabilita botones tras generación
+function disableDocumentPanelButtons() {
+  selectBtn.disabled = true;
+  generateBtn.disabled = true;
+  selectBtn.classList.add('bg-blue-300', 'hover:bg-blue-300', 'cursor-not-allowed');
+  selectBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+  generateBtn.classList.add('bg-green-300', 'hover:bg-green-300', 'cursor-not-allowed');
+  generateBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+  // Deshabilitar todos los botones de borrar
+  document.querySelectorAll('#document-list button').forEach(btn => {
+    btn.disabled = true;
+    btn.classList.add('bg-red-300', 'hover:bg-red-300', 'cursor-not-allowed');
+    btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+  });
+}
+
+generateBtn.onclick = async () => {
+  generateBtn.disabled = true;
+  generateBtn.textContent = 'Generando...';
+  const res = await fetch('/api/documents/generate-funcional', { method: 'POST' });
+  if (res.ok) {
+    const data = await res.json();
+    disableDocumentPanelButtons();
+    generateBtn.textContent = 'Generar Funcional';
+    // Mantener el tamaño de las cajas tras la carga
+    if (data && data.funcional) {
+      input.value = data.funcional;
+      input.style.height = '150px';
+      preview.innerHTML = window.marked.parse(data.funcional, { headerIds: false });
+      preview.style.height = '150px';
+    }
+    alert('✅ ¡Documento funcional generado con éxito!\nPuedes continuar trabajando en el resto de paneles.');
+  } else {
+    let msg = 'Error generando el análisis funcional.';
+    try {
+      const data = await res.json();
+      if (data && data.error) msg = data.error;
+    } catch (e) {}
+    generateBtn.disabled = false;
+    generateBtn.textContent = 'Generar Funcional';
+    alert(msg);
+  }
+};
+
+updateBtn.onclick = async () => {
+  updateBtn.disabled = true;
+  updateBtn.textContent = 'Actualizando...';
+  const res = await fetch('/api/documents/update-funcional', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: input.value })
+  });
+  if (res.ok) {
+    alert('✅ ¡Documento funcional actualizado!');
+  } else {
+    alert('Error actualizando el documento funcional.');
+  }
+  updateBtn.disabled = false;
+  updateBtn.textContent = 'Actualizar';
+};
+
+exportBtn.onclick = async () => {
+  // Mostrar opciones de exportación
+  const tipo = prompt('¿Exportar como Word (docx) o PDF? Escribe "word" o "pdf".');
+  if (!tipo) return;
+  let endpoint = '';
+  if (tipo.toLowerCase() === 'word') endpoint = '/api/documents/export-funcional?format=docx';
+  else if (tipo.toLowerCase() === 'pdf') endpoint = '/api/documents/export-funcional?format=pdf';
+  else return alert('Formato no soportado.');
+  window.open(endpoint, '_blank');
 };
 </script>
 {% endblock %}
