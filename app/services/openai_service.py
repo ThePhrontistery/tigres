@@ -7,6 +7,7 @@ import openai
 from openai import AzureOpenAI
 from docx import Document
 from PyPDF2 import PdfReader
+import asyncio
 
 def extract_text_from_file(file_path: str) -> str:
     """Extrae texto de un archivo PDF, DOCX o TXT."""
@@ -56,5 +57,35 @@ def generate_funcional_analysis(file_paths: List[str]) -> str:
         ],
         temperature=0.2,
         max_tokens=2048,
+    )
+    return response.choices[0].message.content
+
+async def ask_azure_openai(message: str, document_content: str) -> str:
+    """Consulta Azure OpenAI con o sin contexto de documento funcional."""
+    if document_content.strip():
+        prompt = (
+            "Eres un asistente experto en análisis funcional. Responde la consulta del usuario usando únicamente la información relevante del siguiente documento funcional en Markdown.\n\n"
+            f"DOCUMENTO FUNCIONAL:\n{document_content}\n\n"
+            f"PREGUNTA DEL USUARIO: {message}"
+        )
+    else:
+        prompt = (
+            "Eres un asistente de IA. Responde la consulta del usuario de forma clara y útil.\n\n"
+            f"PREGUNTA DEL USUARIO: {message}"
+        )
+    client = AzureOpenAI(
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        api_version="2023-05-15",
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    )
+    response = await asyncio.to_thread(
+        client.chat.completions.create,
+        model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+        messages=[
+            {"role": "system", "content": "Eres un asistente de IA experto."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+        max_tokens=1024,
     )
     return response.choices[0].message.content

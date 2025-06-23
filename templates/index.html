@@ -156,10 +156,33 @@ chatForm.onsubmit = async (e) => {
   chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
   chatInput.value = '';
   chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
-  setTimeout(() => {
-    chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Esta es una respuesta simulada.');
+  // Obtener el contenido actual del editor Markdown
+  const markdownInput = document.getElementById('markdown-input');
+  const documentContent = markdownInput ? markdownInput.value : '';
+  try {
+    const res = await fetch('/api/chatbot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, document_content: documentContent })
+    });
+    let data;
+    try {
+      data = await res.json();
+    } catch (err) {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Error: respuesta inválida del servidor.');
+      return;
+    }
+    if (res.ok && data && typeof data.response === 'string') {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', data.response);
+    } else if (data && data.detail) {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', `Error ${res.status}: ${data.detail}`);
+    } else {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', `Error ${res.status}: respuesta inesperada de la IA.`);
+    }
     chatMessages.scrollTop = chatMessages.scrollHeight;
-  }, 1000);
+  } catch (err) {
+    chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Error al consultar la IA.');
+  }
 };
 
 const generateBtn = document.getElementById('generate-funcional');
