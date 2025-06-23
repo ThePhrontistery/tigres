@@ -9,7 +9,6 @@
   </form>
 </div>
 <script>
-<<<<<<< HEAD
   const chatForm = document.getElementById('chat-form');
   const chatInput = document.getElementById('chat-input');
   const chatMessages = document.getElementById('chat-messages');
@@ -43,32 +42,5 @@
       chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Error al consultar la IA.');
     }
   };
-=======
-const chatForm = document.getElementById('chat-form');
-const chatInput = document.getElementById('chat-input');
-const chatMessages = document.getElementById('chat-messages');
-chatForm.onsubmit = async (e) => {
-  e.preventDefault();
-  const msg = chatInput.value.trim();
-  if (!msg) return;
-  chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
-  chatInput.value = '';
-  chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> <span id='ia-thinking'>Pensando...</span></div>`;
-  const formData = new FormData();
-  formData.append('question', msg);
-  try {
-    const res = await fetch('/api/chatbot/ask', { method: 'POST', body: formData });
-    if (res.ok) {
-      const data = await res.json();
-      document.getElementById('ia-thinking').parentElement.innerHTML = `<b>IA:</b> ${data.answer}`;
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    } else {
-      document.getElementById('ia-thinking').parentElement.innerHTML = `<b>IA:</b> Error al consultar la IA.`;
-    }
-  } catch (err) {
-    document.getElementById('ia-thinking').parentElement.innerHTML = `<b>IA:</b> Error de conexión.`;
-  }
-};
->>>>>>> 63fc833c99224178f72546ed75dd2efafa9cfe35
 </script>
 {% endblock %}

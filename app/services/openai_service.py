@@ -60,7 +60,6 @@ def generate_funcional_analysis(file_paths: List[str]) -> str:
     )
     return response.choices[0].message.content
 
-<<<<<<< HEAD
 async def ask_azure_openai(message: str, document_content: str) -> str:
     """Consulta Azure OpenAI con o sin contexto de documento funcional."""
     if document_content.strip():
@@ -90,33 +89,3 @@ async def ask_azure_openai(message: str, document_content: str) -> str:
         max_tokens=1024,
     )
     return response.choices[0].message.content
-=======
-async def ask_azure_openai_with_context(question: str, context: str) -> str:
-    """Consulta a Azure OpenAI usando el contexto del documento funcional y la pregunta del usuario."""
-    try:
-        client = AzureOpenAI(
-            api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-            api_version="2023-05-15",
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-        )
-        prompt = (
-            "Eres un asistente experto en análisis funcional. Responde la siguiente pregunta del usuario usando solo la información del documento funcional proporcionado como contexto.\n\n"
-            f"DOCUMENTO FUNCIONAL:\n{context}\n\nPREGUNTA DEL USUARIO: {question}"
-        )
-        response = await asyncio.to_thread(
-            client.chat.completions.create,
-            model=os.getenv("AZURE_OPENAI_DEPLOYMENT"),
-            messages=[
-                {"role": "system", "content": "Eres un asistente experto en análisis funcional."},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.2,
-            max_tokens=1024,
-        )
-        answer = response.choices[0].message.content.strip()
-        print(f"[DEBUG] Pregunta: {question}\nRespuesta IA: {answer}")
-        return answer
-    except Exception as e:
-        print(f"[ERROR] Azure OpenAI: {e}")
-        return "[ERROR] No se pudo obtener respuesta de Azure OpenAI. Consulta la configuración y los logs."
->>>>>>> 63fc833c99224178f72546ed75dd2efafa9cfe35
