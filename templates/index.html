@@ -1,33 +1,81 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="w-screen h-screen min-h-screen min-w-full bg-slate-100 flex flex-col">
+{% extends "base.html" %} {% block content %}
+<div
+  class="w-screen h-screen min-h-screen min-w-full bg-slate-100 flex flex-col"
+>
   <header class="w-full mb-2">
-    <h1 class="text-4xl font-bold text-blue-700 text-center py-6 bg-white shadow">Metasketch</h1>
+    <h1
+      class="text-4xl font-bold text-blue-700 text-center py-6 bg-white shadow"
+    >
+      Metasketch
+    </h1>
   </header>
   <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
     <!-- Columna 1: Documentos -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
       <h2 class="text-lg font-bold mb-4">Lista de Documentos</h2>
       <ul id="document-list" class="mb-4 space-y-2 flex-1 overflow-y-auto"></ul>
-      <button id="open-upload-modal" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Select</button>
-      <button id="generate-funcional" class="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Generar Funcional</button>
-      <div id="delete-confirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+      <button
+        id="open-upload-modal"
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Subir Documento
+      </button>
+      <button
+        id="generate-funcional"
+        class="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Generar Funcional
+      </button>
+      <div
+        id="delete-confirm"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50"
+      >
         <div class="bg-white p-6 rounded shadow-lg w-80">
-          <h3 class="text-lg font-semibold mb-4 text-red-600">¿Seguro que quieres borrar este documento?</h3>
+          <h3 class="text-lg font-semibold mb-4 text-red-600">
+            ¿Seguro que quieres borrar este documento?
+          </h3>
           <div class="flex justify-end space-x-2">
-            <button id="cancel-delete" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
-            <button id="confirm-delete" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Borrar</button>
+            <button
+              id="cancel-delete"
+              class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+            >
+              Cancelar
+            </button>
+            <button
+              id="confirm-delete"
+              class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Borrar
+            </button>
           </div>
         </div>
       </div>
       <!-- Modal de subida -->
-      <div id="upload-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+      <div
+        id="upload-modal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50"
+      >
         <div class="bg-white p-6 rounded shadow-lg w-80">
           <h3 class="text-lg font-semibold mb-4">Subir Documentos</h3>
-          <input id="file-input" type="file" multiple class="mb-4 block w-full" />
+          <input
+            id="file-input"
+            type="file"
+            multiple
+            class="mb-4 block w-full"
+          />
           <div class="flex justify-end space-x-2">
-            <button id="close-modal" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cerrar</button>
-            <button id="upload-files" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Upload</button>
+            <button
+              id="close-modal"
+              class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+            >
+              Cerrar
+            </button>
+            <button
+              id="upload-files"
+              class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              Upload
+            </button>
           </div>
         </div>
       </div>
@@ -36,45 +84,79 @@
     <!-- Columna 2: Árbol de Contenidos -->
     <section class="bg-white rounded shadow p-4 h-full overflow-y-auto">
       <h2 class="text-lg font-bold mb-4">Árbol de Contenidos</h2>
-      <ul class="pl-4 border-l-2 border-gray-300">
-        <li class="mb-2">
-          <span class="font-semibold">1. Introducción</span>
-          <ul class="pl-4 list-disc">
-            <li>1.1 Objetivo</li>
-            <li>1.2 Alcance</li>
-          </ul>
-        </li>
-        <li class="mb-2">
-          <span class="font-semibold">2. Requerimientos</span>
-          <ul class="pl-4 list-disc">
-            <li>2.1 Funcionales</li>
-            <li>2.2 No Funcionales</li>
-          </ul>
-        </li>
-      </ul>
+      <div
+        id="content-tree-panel-placeholder"
+        class="text-gray-400"
+        style="display: none"
+      >
+        Genera primero el documento funcional para ver el árbol de contenido.
+      </div>
+      <div
+        id="content-tree-panel"
+        hx-get="/api/content-tree"
+        hx-trigger="load"
+        hx-swap="innerHTML"
+        style="display: none"
+      ></div>
     </section>
 
     <!-- Columna 3: Editor Markdown -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
       <h2 class="text-lg font-bold mb-4">Editor Markdown</h2>
       <div class="flex flex-col flex-1 gap-2">
-        <textarea id="markdown-input" class="w-full flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded focus:outline-none focus:ring resize-none overflow-auto" placeholder="Escribe en Markdown..."></textarea>
+        <textarea
+          id="markdown-input"
+          class="w-full flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded focus:outline-none focus:ring resize-none overflow-auto"
+          placeholder="Escribe en Markdown..."
+        ></textarea>
         <h2 class="text-lg font-bold mb-2">Previsualización</h2>
-        <div id="markdown-preview" class="prose flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded bg-gray-50 overflow-auto"></div>
+        <div
+          id="markdown-preview"
+          class="prose flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded bg-gray-50 overflow-auto"
+        ></div>
       </div>
       <div class="flex gap-2 mt-4 justify-end">
-        <button id="update-funcional" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Actualizar</button>
-        <button id="export-funcional" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">Exportar</button>
+        <button
+          id="update-funcional"
+          class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+        >
+          Actualizar
+        </button>
+        <button
+          id="export-funcional"
+          class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+        >
+          Exportar
+        </button>
       </div>
     </section>
 
     <!-- Columna 4: ChatBot IA -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
       <h2 class="text-lg font-bold mb-4">ChatBot IA</h2>
-      <div id="chat-messages" class="flex-1 h-48 overflow-y-auto bg-gray-50 p-2 rounded border mb-2"></div>
+      <div
+        id="chat-messages"
+        class="bg-gray-50 p-2 rounded border mb-2"
+        style="
+          height: 430px;
+          min-height: 120px;
+          max-height: 430px;
+          overflow-y: auto;
+        "
+      ></div>
       <form id="chat-form" class="flex gap-2 mt-2">
-        <input id="chat-input" type="text" class="flex-1 border rounded p-2" placeholder="Escribe tu mensaje..." required />
-        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar</button>
+        <input
+          id="chat-input"
+          type="text"
+          class="flex-1 border rounded p-2"
+          placeholder="Escribe tu mensaje..."
+          required
+        />
+        <button
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Enviar
+        </button>
       </form>
     </section>
   </div>
@@ -83,183 +165,345 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
 <script>
-// Panel Documentos
-const openModalBtn = document.getElementById('open-upload-modal');
-const modal = document.getElementById('upload-modal');
-const closeModalBtn = document.getElementById('close-modal');
-openModalBtn.onclick = () => modal.classList.remove('hidden');
-closeModalBtn.onclick = () => modal.classList.add('hidden');
+  // Panel Documentos
+  const openModalBtn = document.getElementById("open-upload-modal");
+  const modal = document.getElementById("upload-modal");
+  const closeModalBtn = document.getElementById("close-modal");
+  openModalBtn.onclick = () => modal.classList.remove("hidden");
+  closeModalBtn.onclick = () => modal.classList.add("hidden");
 
-let fileToDelete = null;
-const confirmModal = document.getElementById('delete-confirm');
-const cancelDeleteBtn = document.getElementById('cancel-delete');
-const confirmDeleteBtn = document.getElementById('confirm-delete');
+  let fileToDelete = null;
+  const confirmModal = document.getElementById("delete-confirm");
+  const cancelDeleteBtn = document.getElementById("cancel-delete");
+  const confirmDeleteBtn = document.getElementById("confirm-delete");
 
-async function loadDocuments() {
-  const res = await fetch('/api/documents/list');
-  const docs = await res.json();
-  const list = document.getElementById('document-list');
-  list.innerHTML = '';
-  if (docs.length === 0) {
-    list.innerHTML = '<li class="text-gray-400">No hay documentos subidos.</li>';
-  } else {
-    docs.forEach(doc => {
-      list.innerHTML += `<li class='border rounded px-2 py-1 flex items-center justify-between'>
+  async function loadDocuments() {
+    const res = await fetch("/api/documents/list");
+    const docs = await res.json();
+    const list = document.getElementById("document-list");
+    list.innerHTML = "";
+    if (docs.length === 0) {
+      list.innerHTML =
+        '<li class="text-gray-400">No hay documentos subidos.</li>';
+    } else {
+      docs.forEach((doc) => {
+        list.innerHTML += `<li class='border rounded px-2 py-1 flex items-center justify-between'>
         <span>${doc}</span>
         <button onclick="showDeleteConfirm('${doc}')" class='ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs'>Borrar</button>
       </li>`;
-    });
+      });
+    }
   }
-}
-loadDocuments();
+  loadDocuments();
 
-window.showDeleteConfirm = function(filename) {
-  fileToDelete = filename;
-  confirmModal.classList.remove('hidden');
-};
-cancelDeleteBtn.onclick = () => {
-  fileToDelete = null;
-  confirmModal.classList.add('hidden');
-};
-confirmDeleteBtn.onclick = async () => {
-  if (!fileToDelete) return;
-  await fetch(`/api/documents/${fileToDelete}`, { method: 'DELETE' });
-  fileToDelete = null;
-  confirmModal.classList.add('hidden');
-  await loadDocuments();
-};
-document.getElementById('upload-files').onclick = async () => {
-  const input = document.getElementById('file-input');
-  if (!input.files.length) return;
-  const formData = new FormData();
-  for (const file of input.files) formData.append('files', file);
-  await fetch('/api/upload', { method: 'POST', body: formData });
-  modal.classList.add('hidden');
-  await loadDocuments();
-};
-// Panel Markdown
-const input = document.getElementById('markdown-input');
-const preview = document.getElementById('markdown-preview');
-input.addEventListener('input', () => {
-  // Usar marked para convertir markdown a HTML y DOMPurify para sanitizar
-  const rawHtml = window.marked.parse(input.value, { headerIds: false });
-  preview.innerHTML = DOMPurify.sanitize(rawHtml);
-});
-// Panel ChatBot
-const chatForm = document.getElementById('chat-form');
-const chatInput = document.getElementById('chat-input');
-const chatMessages = document.getElementById('chat-messages');
-chatForm.onsubmit = async (e) => {
-  e.preventDefault();
-  const msg = chatInput.value.trim();
-  if (!msg) return;
-  chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
-  chatInput.value = '';
-  chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
-  // Obtener el contenido actual del editor Markdown
-  const markdownInput = document.getElementById('markdown-input');
-  const documentContent = markdownInput ? markdownInput.value : '';
-  try {
-    const res = await fetch('/api/chatbot', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, document_content: documentContent })
-    });
-    let data;
-    try {
-      data = await res.json();
-    } catch (err) {
-      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Error: respuesta inválida del servidor.');
+  window.showDeleteConfirm = function (filename) {
+    fileToDelete = filename;
+    confirmModal.classList.remove("hidden");
+  };
+  cancelDeleteBtn.onclick = () => {
+    fileToDelete = null;
+    confirmModal.classList.add("hidden");
+  };
+  confirmDeleteBtn.onclick = async () => {
+    if (!fileToDelete) return;
+    await fetch(`/api/documents/${fileToDelete}`, { method: "DELETE" });
+    fileToDelete = null;
+    confirmModal.classList.add("hidden");
+    await loadDocuments();
+  };
+  document.getElementById("upload-files").onclick = async () => {
+    const input = document.getElementById("file-input");
+    if (!input.files.length) return;
+    // Obtener lista de archivos ya cargados
+    const res = await fetch("/api/documents/list");
+    const docs = await res.json();
+    const archivosExistentes = new Set(docs.map((f) => f.toLowerCase()));
+    let repetido = false;
+    for (const file of input.files) {
+      if (archivosExistentes.has(file.name.toLowerCase())) {
+        repetido = true;
+        break;
+      }
+    }
+    if (repetido) {
+      alert("Ya existe un documento con ese nombre. Elige otro archivo.");
       return;
     }
-    if (res.ok && data && typeof data.response === 'string') {
-      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', data.response);
-    } else if (data && data.detail) {
-      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', `Error ${res.status}: ${data.detail}`);
-    } else {
-      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', `Error ${res.status}: respuesta inesperada de la IA.`);
-    }
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  } catch (err) {
-    chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Error al consultar la IA.');
-  }
-};
-
-const generateBtn = document.getElementById('generate-funcional');
-const selectBtn = document.getElementById('open-upload-modal');
-const updateBtn = document.getElementById('update-funcional');
-const exportBtn = document.getElementById('export-funcional');
-
-// Deshabilita botones tras generación
-function disableDocumentPanelButtons() {
-  selectBtn.disabled = true;
-  generateBtn.disabled = true;
-  selectBtn.classList.add('bg-blue-300', 'hover:bg-blue-300', 'cursor-not-allowed');
-  selectBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-  generateBtn.classList.add('bg-green-300', 'hover:bg-green-300', 'cursor-not-allowed');
-  generateBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
-  // Deshabilitar todos los botones de borrar
-  document.querySelectorAll('#document-list button').forEach(btn => {
-    btn.disabled = true;
-    btn.classList.add('bg-red-300', 'hover:bg-red-300', 'cursor-not-allowed');
-    btn.classList.remove('bg-red-500', 'hover:bg-red-600');
+    const formData = new FormData();
+    for (const file of input.files) formData.append("files", file);
+    await fetch("/api/upload", { method: "POST", body: formData });
+    modal.classList.add("hidden");
+    await loadDocuments();
+  };
+  // Panel Markdown
+  const input = document.getElementById("markdown-input");
+  const preview = document.getElementById("markdown-preview");
+  input.addEventListener("input", () => {
+    // Usar marked para convertir markdown a HTML y DOMPurify para sanitizar
+    const rawHtml = window.marked.parse(input.value, { headerIds: false });
+    preview.innerHTML = DOMPurify.sanitize(rawHtml);
   });
-}
-
-generateBtn.onclick = async () => {
-  generateBtn.disabled = true;
-  generateBtn.textContent = 'Generando...';
-  const res = await fetch('/api/documents/generate-funcional', { method: 'POST' });
-  if (res.ok) {
-    const data = await res.json();
-    disableDocumentPanelButtons();
-    generateBtn.textContent = 'Generar Funcional';
-    // Mantener el tamaño de las cajas tras la carga
-    if (data && data.funcional) {
-      input.value = data.funcional;
-      input.style.height = '150px';
-      preview.innerHTML = window.marked.parse(data.funcional, { headerIds: false });
-      preview.style.height = '150px';
-    }
-    alert('✅ ¡Documento funcional generado con éxito!\nPuedes continuar trabajando en el resto de paneles.');
-  } else {
-    let msg = 'Error generando el análisis funcional.';
+  // Panel ChatBot
+  const chatForm = document.getElementById("chat-form");
+  const chatInput = document.getElementById("chat-input");
+  const chatMessages = document.getElementById("chat-messages");
+  chatForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+    chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
+    chatInput.value = "";
+    chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
+    // Obtener el contenido actual del editor Markdown
+    const markdownInput = document.getElementById("markdown-input");
+    const documentContent = markdownInput ? markdownInput.value : "";
     try {
-      const data = await res.json();
-      if (data && data.error) msg = data.error;
-    } catch (e) {}
-    generateBtn.disabled = false;
-    generateBtn.textContent = 'Generar Funcional';
-    alert(msg);
-  }
-};
+      const res = await fetch("/api/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: msg,
+          document_content: documentContent,
+        }),
+      });
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          "Error: respuesta inválida del servidor."
+        );
+        return;
+      }
+      if (res.ok && data && typeof data.response === "string") {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          data.response
+        );
+      } else if (data && data.detail) {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          `Error ${res.status}: ${data.detail}`
+        );
+      } else {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          `Error ${res.status}: respuesta inesperada de la IA.`
+        );
+      }
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    } catch (err) {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace(
+        "Pensando...",
+        "Error al consultar la IA."
+      );
+    }
+  };
 
-updateBtn.onclick = async () => {
-  updateBtn.disabled = true;
-  updateBtn.textContent = 'Actualizando...';
-  const res = await fetch('/api/documents/update-funcional', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content: input.value })
-  });
-  if (res.ok) {
-    alert('✅ ¡Documento funcional actualizado!');
+  // Control de visibilidad del árbol de contenido
+  function showContentTreePanel() {
+    document.getElementById("content-tree-panel").style.display = "";
+    document.getElementById("content-tree-panel-placeholder").style.display =
+      "none";
+  }
+  function hideContentTreePanel() {
+    document.getElementById("content-tree-panel").style.display = "none";
+    document.getElementById("content-tree-panel-placeholder").style.display =
+      "";
+  }
+  // Al cargar la página, oculta el árbol si no se ha generado el funcional
+  if (!localStorage.getItem("funcionalGenerado")) {
+    hideContentTreePanel();
   } else {
-    alert('Error actualizando el documento funcional.');
+    showContentTreePanel();
   }
-  updateBtn.disabled = false;
-  updateBtn.textContent = 'Actualizar';
-};
+  // Tras generar el funcional, muestra el árbol
+  const generateBtn2 = document.getElementById("generate-funcional");
+  if (generateBtn2) {
+    generateBtn2.addEventListener("click", function () {
+      // Espera a que termine la generación y luego muestra el árbol
+      const checkFuncional = setInterval(() => {
+        if (localStorage.getItem("funcionalGenerado")) {
+          showContentTreePanel();
+          document
+            .getElementById("content-tree-panel")
+            .dispatchEvent(new Event("load"));
+          clearInterval(checkFuncional);
+        }
+      }, 500);
+    });
+  }
+  // Cuando se genera el funcional exitosamente, marca la bandera
+  const updateFuncionalFlag = () =>
+    localStorage.setItem("funcionalGenerado", "1");
+  // Hook en el fetch de generación
+  const oldFetch = window.fetch;
+  window.fetch = async function (...args) {
+    const res = await oldFetch.apply(this, args);
+    if (
+      args[0] &&
+      args[0].toString().includes("/api/documents/generate-funcional") &&
+      res.ok
+    ) {
+      updateFuncionalFlag();
+    }
+    return res;
+  };
 
-exportBtn.onclick = async () => {
-  // Mostrar opciones de exportación
-  const tipo = prompt('¿Exportar como Word (docx) o PDF? Escribe "word" o "pdf".');
-  if (!tipo) return;
-  let endpoint = '';
-  if (tipo.toLowerCase() === 'word') endpoint = '/api/documents/export-funcional?format=docx';
-  else if (tipo.toLowerCase() === 'pdf') endpoint = '/api/documents/export-funcional?format=pdf';
-  else return alert('Formato no soportado.');
-  window.open(endpoint, '_blank');
-};
+  const generateBtn = document.getElementById("generate-funcional");
+  const selectBtn = document.getElementById("open-upload-modal");
+  const updateBtn = document.getElementById("update-funcional");
+  const exportBtn = document.getElementById("export-funcional");
+
+  // Deshabilita botones tras generación
+  function disableDocumentPanelButtons() {
+    selectBtn.disabled = true;
+    generateBtn.disabled = true;
+    selectBtn.classList.add(
+      "bg-blue-300",
+      "hover:bg-blue-300",
+      "cursor-not-allowed"
+    );
+    selectBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+    generateBtn.classList.add(
+      "bg-green-300",
+      "hover:bg-green-300",
+      "cursor-not-allowed"
+    );
+    generateBtn.classList.remove("bg-green-600", "hover:bg-green-700");
+    // Deshabilitar todos los botones de borrar
+    document.querySelectorAll("#document-list button").forEach((btn) => {
+      btn.disabled = true;
+      btn.classList.add("bg-red-300", "hover:bg-red-300", "cursor-not-allowed");
+      btn.classList.remove("bg-red-500", "hover:bg-red-600");
+    });
+  }
+
+  generateBtn.onclick = async () => {
+    generateBtn.disabled = true;
+    generateBtn.textContent = "Generando...";
+    const res = await fetch("/api/documents/generate-funcional", {
+      method: "POST",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      disableDocumentPanelButtons();
+      generateBtn.textContent = "Generar Funcional";
+      // Mantener el tamaño de las cajas tras la carga
+      if (data && data.funcional) {
+        input.value = data.funcional;
+        input.style.height = "150px";
+        preview.innerHTML = window.marked.parse(data.funcional, {
+          headerIds: false,
+        });
+        preview.style.height = "150px";
+      }
+      alert(
+        "✅ ¡Documento funcional generado con éxito!\nPuedes continuar trabajando en el resto de paneles."
+      );
+    } else {
+      let msg = "Error generando el análisis funcional.";
+      try {
+        const data = await res.json();
+        if (data && data.error) msg = data.error;
+      } catch (e) {}
+      generateBtn.disabled = false;
+      generateBtn.textContent = "Generar Funcional";
+      alert(msg);
+    }
+  };
+
+  updateBtn.onclick = async () => {
+    updateBtn.disabled = true;
+    updateBtn.textContent = "Actualizando...";
+    const res = await fetch("/api/documents/update-funcional", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: input.value }),
+    });
+    if (res.ok) {
+      alert("✅ ¡Documento funcional actualizado!");
+    } else {
+      alert("Error actualizando el documento funcional.");
+    }
+    updateBtn.disabled = false;
+    updateBtn.textContent = "Actualizar";
+  };
+
+  exportBtn.onclick = async () => {
+    // Mostrar opciones de exportación
+    const tipo = prompt(
+      '¿Exportar como Word (docx) o PDF? Escribe "word" o "pdf".'
+    );
+    if (!tipo) return;
+    let endpoint = "";
+    if (tipo.toLowerCase() === "word")
+      endpoint = "/api/documents/export-funcional?format=docx";
+    else if (tipo.toLowerCase() === "pdf")
+      endpoint = "/api/documents/export-funcional?format=pdf";
+    else return alert("Formato no soportado.");
+    window.open(endpoint, "_blank");
+  };
+
+  // Sincronización de scroll y resaltado entre editor y previsualización
+  window.goToSection = function (e, sectionTitle) {
+    if (e) e.preventDefault();
+    const textarea = document.getElementById("markdown-input");
+    const preview = document.getElementById("markdown-preview");
+    if (!textarea) return;
+    const value = textarea.value;
+    // Busca el título como encabezado Markdown (## o ###)
+    const regex = new RegExp(
+      `^#+\\s*${sectionTitle.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}`,
+      "m"
+    );
+    const match = value.match(regex);
+    if (match) {
+      const pos = match.index;
+      textarea.focus();
+      textarea.setSelectionRange(pos, pos);
+      // Calcula la línea donde está la sección
+      const before = value.slice(0, pos);
+      const linesBefore = before.split("\n").length - 1;
+      // Calcula la altura de línea real
+      const style = window.getComputedStyle(textarea);
+      const lineHeight = parseFloat(style.lineHeight) || 20;
+      // Calcula el scrollTop para que la línea quede en la primera fila visible
+      textarea.scrollTop = linesBefore * lineHeight;
+      // Resalta la línea en la previsualización y la lleva al tope
+      setTimeout(() => {
+        const previewDiv = document.getElementById("markdown-preview");
+        if (!previewDiv) return;
+        previewDiv
+          .querySelectorAll(".section-highlight")
+          .forEach((el) => el.classList.remove("section-highlight"));
+        const headers = previewDiv.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        for (const h of headers) {
+          if (
+            h.textContent.trim().replace(/\s+/g, " ") ===
+            sectionTitle.trim().replace(/\s+/g, " ")
+          ) {
+            h.classList.add("section-highlight");
+            // Lleva el encabezado al tope del contenedor
+            const container = previewDiv.parentElement;
+            if (container && container.scrollTo) {
+              container.scrollTo({
+                top: h.offsetTop - container.offsetTop,
+                behavior: "smooth",
+              });
+            } else {
+              h.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+            break;
+          }
+        }
+      }, 100);
+    }
+  };
+  // Agrega el estilo para el resaltado
+  const style = document.createElement("style");
+  style.innerHTML = `.section-highlight { background-color: #f3f4f6 !important; border-radius: 0.25rem; padding: 0.1em 0.3em; }`;
+  document.head.appendChild(style);
 </script>
 {% endblock %}
