@@ -1,8 +1,13 @@
 {% extends 'base.html' %} {% block content %}
 <div
   class="max-w-xl mx-auto mt-4 p-4 bg-white rounded shadow overflow-x-auto overflow-y-auto"
-  style="min-height: 200px; max-height: 430px"
+  style="min-height: 300px; max-height: 645px;"
 >
+  {% if tree|length == 0 %}
+    <div class="text-center text-gray-500 py-8">
+      El índice se muestra cuando haya un <span class="font-semibold text-blue-700">Documento Funcional</span> generado.
+    </div>
+  {% else %}
   <ul class="pl-4 border-l-2 border-gray-300 min-w-[350px]">
     {% for node in tree %}
     <li class="mb-2">
@@ -31,6 +36,7 @@
     </li>
     {% endfor %}
   </ul>
+  {% endif %}
 </div>
 <script>
   function goToSection(e, sectionTitle) {
@@ -43,7 +49,7 @@
     const value = textarea.value;
     // Busca el título como encabezado Markdown (## o ###)
     const regex = new RegExp(
-      `^#+\\s*${sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`,
+      `^#+\\s*${sectionTitle.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}`,
       "m"
     );
     const match = value.match(regex);
