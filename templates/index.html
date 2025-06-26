@@ -130,7 +130,7 @@
           id="update-funcional"
           class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
         >
-          Actualizar
+          Guardar Cambios
         </button>
         <button
           id="export-funcional"
@@ -314,19 +314,26 @@
   // Control de visibilidad del árbol de contenido
   function showContentTreePanel() {
     document.getElementById("content-tree-panel").style.display = "";
-    document.getElementById("content-tree-panel-placeholder").style.display =
-      "none";
+    document.getElementById("content-tree-panel-placeholder").style.display = "none";
   }
   function hideContentTreePanel() {
     document.getElementById("content-tree-panel").style.display = "none";
-    document.getElementById("content-tree-panel-placeholder").style.display =
-      "";
+    document.getElementById("content-tree-panel-placeholder").style.display = "";
   }
   // Al cargar la página, oculta el árbol si no se ha generado el funcional
-  if (!localStorage.getItem("funcionalGenerado")) {
-    hideContentTreePanel();
-  } else {
-    showContentTreePanel();
+  function checkFuncionalGenerado() {
+    const funcional = document.getElementById("markdown-input").value.trim();
+    if (funcional) {
+      showContentTreePanel();
+    } else {
+      hideContentTreePanel();
+    }
+  }
+  checkFuncionalGenerado();
+  // Cuando se actualiza el editor, volver a comprobar
+  const markdownInput = document.getElementById("markdown-input");
+  if (markdownInput) {
+    markdownInput.addEventListener("input", checkFuncionalGenerado);
   }
   // Tras generar el funcional, muestra el árbol
   const generateBtn2 = document.getElementById("generate-funcional");
