@@ -102,16 +102,44 @@ async def update_funcional(data: dict = Body(...)) -> dict:
 
 @router.get("/documents/export-funcional")
 async def export_funcional(format: str = Query("docx", enum=["docx", "pdf"])):
-    """Exporta el documento funcional a Word o PDF."""
+    """Exporta el documento funcional a Word o PDF con formato interpretado desde Markdown."""
     internal_path = UPLOAD_DIR / "funcional_generado.md"
     if not internal_path.exists():
         return JSONResponse(status_code=404, content={"error": "No existe el documento funcional generado."})
     content = internal_path.read_text(encoding="utf-8")
     if format == "docx":
+        import markdown
+        from bs4 import BeautifulSoup
+        from docx import Document as DocxDocument
+        from docx.shared import Pt
+        from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
+        import tempfile
+        # Convierte Markdown a HTML
+        html = markdown.markdown(content)
+        soup = BeautifulSoup(html, "html.parser")
+        doc = DocxDocument()
+        for el in soup.children:
+            if el.name and el.name.startswith('h') and el.name[1:].isdigit():
+                level = int(el.name[1:])
+                doc.add_heading(el.get_text(), level=level if level <= 4 else 4)
+            elif el.name == 'ul':
+                for li in el.find_all('li', recursive=False):
+                    p = doc.add_paragraph(li.get_text(), style='List Bullet')
+            elif el.name == 'ol':
+                for li in el.find_all('li', recursive=False):
+                    p = doc.add_paragraph(li.get_text(), style='List Number')
+            elif el.name == 'p':
+                p = doc.add_paragraph(el.get_text())
+            elif el.name == 'strong':
+                p = doc.add_paragraph()
+                run = p.add_run(el.get_text())
+                run.bold = True
+            elif el.name == 'em':
+                p = doc.add_paragraph()
+                run = p.add_run(el.get_text())
+                run.italic = True
+            # Puedes agregar más reglas para otros elementos si lo necesitas
         with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
-            doc = DocxDocument()
-            for line in content.splitlines():
-                doc.add_paragraph(line)
             doc.save(tmp.name)
             tmp.flush()
             return FileResponse(tmp.name, filename="funcional_generado.docx", media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")

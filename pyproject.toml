@@ -17,4 +17,5 @@ dependencies = [
     "PyPDF2",
     "markdown",
     "pdfkit",
+    "beautifulsoup4",  # Necesario para exportar a Word interpretando HTML
 ]
