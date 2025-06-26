@@ -18,4 +18,5 @@ dependencies = [
     "markdown",
     "pdfkit",
     "beautifulsoup4",  # Necesario para exportar a Word interpretando HTML
+    "fpdf2",           # Necesario para exportar a PDF sin librerías nativas
 ]

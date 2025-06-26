@@ -12,6 +12,7 @@ import traceback
 import tempfile
 import markdown
 import pdfkit
+from fpdf import FPDF
 
 from app.services.openai_service import generate_funcional_analysis
 from docx import Document as DocxDocument
@@ -144,9 +145,79 @@ async def export_funcional(format: str = Query("docx", enum=["docx", "pdf"])):
             tmp.flush()
             return FileResponse(tmp.name, filename="funcional_generado.docx", media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     elif format == "pdf":
+        import tempfile
+        import re
+        class PDF(FPDF):
+            def header(self):
+                self.set_font('Arial', 'B', 14)
+                self.set_text_color(30, 64, 175)
+                self.cell(0, 10, 'Documento Funcional', ln=True, align='C')
+                self.ln(4)
+        pdf = PDF()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.set_font('Arial', '', 12)
+        # Usa un caracter ASCII para la viñeta para evitar problemas de Unicode
+        bullet = '-'  # O '*'
+        lines = content.split('\n')
+        for line in lines:
+            line = line.strip()
+            if not line:
+                pdf.ln(4)
+                continue
+            # Encabezados
+            m = re.match(r'^(#+)\s*(.*)', line)
+            if m:
+                level = len(m.group(1))
+                text = m.group(2)
+                if level == 1:
+                    pdf.set_font('Arial', 'B', 16)
+                    pdf.set_text_color(30, 64, 175)
+                    pdf.cell(0, 10, text, ln=True)
+                    pdf.set_font('Arial', '', 12)
+                    pdf.set_text_color(34, 34, 34)
+                elif level == 2:
+                    pdf.set_font('Arial', 'B', 14)
+                    pdf.set_text_color(30, 64, 175)
+                    pdf.cell(0, 8, text, ln=True)
+                    pdf.set_font('Arial', '', 12)
+                    pdf.set_text_color(34, 34, 34)
+                elif level == 3:
+                    pdf.set_font('Arial', 'B', 12)
+                    pdf.set_text_color(30, 64, 175)
+                    pdf.cell(0, 7, text, ln=True)
+                    pdf.set_font('Arial', '', 12)
+                    pdf.set_text_color(34, 34, 34)
+                else:
+                    pdf.set_font('Arial', 'B', 11)
+                    pdf.set_text_color(30, 64, 175)
+                    pdf.cell(0, 6, text, ln=True)
+                    pdf.set_font('Arial', '', 12)
+                    pdf.set_text_color(34, 34, 34)
+                continue
+            # Listas
+            if line.startswith('- '):
+                pdf.set_x(pdf.get_x() + 5)
+                pdf.cell(0, 7, f'{bullet} ' + line[2:], ln=True)
+                continue
+            # Negrita
+            bold = re.match(r'^\*\*(.+)\*\*$', line)
+            if bold:
+                pdf.set_font('Arial', 'B', 12)
+                pdf.cell(0, 7, bold.group(1), ln=True)
+                pdf.set_font('Arial', '', 12)
+                continue
+            # Cursiva
+            italic = re.match(r'^\*(.+)\*$', line)
+            if italic:
+                pdf.set_font('Arial', 'I', 12)
+                pdf.cell(0, 7, italic.group(1), ln=True)
+                pdf.set_font('Arial', '', 12)
+                continue
+            # Texto normal
+            pdf.multi_cell(0, 7, line)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-            html = markdown.markdown(content)
-            pdfkit.from_string(html, tmp.name)
+            pdf.output(tmp.name)
             tmp.flush()
             return FileResponse(tmp.name, filename="funcional_generado.pdf", media_type="application/pdf")
     return JSONResponse(status_code=400, content={"error": "Formato no soportado."})
