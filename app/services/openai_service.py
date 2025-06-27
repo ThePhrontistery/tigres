@@ -126,6 +126,42 @@ def generate_funcional_analysis(file_paths: List[str]) -> str:
             child_title = f"{child['num']} {child['title']}"
             if not section_in_output(child_title, validated_md):
                 validated_md += f"\n### {child['num']} {child['title']}\n(Completar sección)\n"
+    # Eliminar cualquier índice textual del árbol de contenidos al final del documento funcional
+    def remove_content_tree_index(md: str) -> str:
+        import re
+        # Busca un bloque que empiece por 'Índice' o 'Árbol de contenidos' y lo elimina
+        pattern = re.compile(r"(^#+\s*(Índice|Índice de contenidos|Árbol de contenidos)[\s\S]+?)(?=^#|\Z)", re.MULTILINE | re.IGNORECASE)
+        return re.sub(pattern, '', md).strip()
+    validated_md = remove_content_tree_index(validated_md)
+    # Eliminar cualquier índice textual que aparezca después del glosario
+    def remove_index_after_glossary(md: str) -> str:
+        import re
+        # Busca el encabezado del glosario
+        glossary_pattern = re.compile(r"^(#+\s*9\.\s*Glosario.*)$", re.MULTILINE | re.IGNORECASE)
+        match = glossary_pattern.search(md)
+        if not match:
+            return md
+        glossary_end = match.end()
+        # Busca el primer encabezado de sección después del glosario
+        next_header = re.search(r"^#+\s*\d+\.\s*", md[glossary_end:], re.MULTILINE)
+        if next_header:
+            # Hay otra sección después del glosario, no eliminar nada
+            return md
+        # Si no hay más secciones, elimina cualquier bloque de índice textual después del glosario
+        # Busca patrones típicos de índice textual
+        index_pattern = re.compile(r"(^#+\s*(Índice|Índice de contenidos|Árbol de contenidos)[\s\S]+$)", re.MULTILINE | re.IGNORECASE)
+        before = md[:glosario_end]
+        after = md[glosario_end:]
+        after = re.sub(index_pattern, '', after).strip()
+        return before + after
+    validated_md = remove_index_after_glossary(validated_md)
+    # Eliminar cualquier índice textual (Índice, Índice de contenidos, Árbol de contenidos) al final del documento
+    def remove_trailing_index(md: str) -> str:
+        import re
+        # Busca un bloque de índice al final del documento (después del último encabezado real)
+        pattern = re.compile(r"(^#+\s*(Índice|Índice de contenidos|Árbol de contenidos)[\s\S]*$)", re.MULTILINE | re.IGNORECASE)
+        return re.sub(pattern, '', md).rstrip()
+    validated_md = remove_trailing_index(validated_md)
     return validated_md.strip()
 
 async def ask_azure_openai(message: str, document_content: str) -> str:
