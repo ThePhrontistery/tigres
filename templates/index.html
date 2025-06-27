@@ -103,41 +103,39 @@
     <!-- Columna 3: Editor Markdown -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold">Editor Markdown</h2>
+        <h2 class="text-lg font-bold">Editor Markdown / Previsualización</h2>
         <button id="expand-panel-btn" type="button" class="px-3 py-1 text-xs font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 transition">Expandir</button>
       </div>
-      <div class="flex flex-col flex-1 gap-2">
-        <div class="flex flex-col gap-4 w-full" id="markdown-panel-inner">
+      <div id="markdown-panel-content" class="flex-1 flex flex-col gap-2">
+        <div class="flex flex-row gap-4 w-full" id="markdown-panel-inner">
           <div class="flex-1 flex flex-col">
-            <h3 class="text-base font-semibold mb-2">Editor</h3>
             <textarea
               id="markdown-input"
-              class="w-full flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded focus:outline-none focus:ring resize-none overflow-auto"
+              class="w-full h-[600px] p-2 border rounded focus:outline-none focus:ring resize-none overflow-y-auto"
               placeholder="Escribe en Markdown..."
             ></textarea>
           </div>
           <div class="flex-1 flex flex-col">
-            <h3 class="text-base font-semibold mb-2">Previsualización</h3>
             <div
               id="markdown-preview"
-              class="prose flex-1 min-h-[120px] max-h-[250px] h-[150px] p-2 border rounded bg-gray-50 overflow-auto"
+              class="prose w-full h-[600px] p-2 border rounded bg-gray-50 overflow-y-auto"
             ></div>
           </div>
         </div>
-      </div>
-      <div class="flex gap-2 mt-4 justify-end">
-        <button
-          id="update-funcional"
-          class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-        >
-          Guardar Cambios
-        </button>
-        <button
-          id="export-funcional"
-          class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-        >
-          Exportar
-        </button>
+        <div class="flex gap-2 mt-4 justify-end">
+          <button
+            id="update-funcional"
+            class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+          >
+            Guardar Cambios
+          </button>
+          <button
+            id="export-funcional"
+            class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Exportar
+          </button>
+        </div>
       </div>
     </section>
 
@@ -146,13 +144,8 @@
       <h2 class="text-lg font-bold mb-4">ChatBot IA</h2>
       <div
         id="chat-messages"
-        class="bg-gray-50 p-2 rounded border mb-2"
-        style="
-          height: 430px;
-          min-height: 120px;
-          max-height: 430px;
-          overflow-y: auto;
-        "
+        class="bg-gray-50 p-2 rounded border mb-2 flex-1 min-h-0 overflow-y-auto"
+        style="max-height: 60vh;"
       ></div>
       <form id="chat-form" class="flex gap-2 mt-2">
         <input
@@ -169,6 +162,13 @@
         </button>
       </form>
     </section>
+  </div>
+</div>
+
+<div id="global-blocker" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.7); cursor:wait;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;color:#2563eb;">
+    <svg class="animate-spin h-10 w-10 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+    Generando documento funcional...
   </div>
 </div>
 
@@ -398,10 +398,23 @@
   }
 
   generateBtn.onclick = async () => {
+    // Bloquea toda la pantalla
+    document.getElementById('global-blocker').style.display = '';
+    // Deshabilita todos los controles interactivos
+    document.querySelectorAll('button, input, textarea, select, a').forEach(el => {
+      el.disabled = true;
+      el.classList.add('pointer-events-none','opacity-60');
+    });
     generateBtn.disabled = true;
     generateBtn.textContent = "Generando...";
     const res = await fetch("/api/documents/generate-funcional", {
       method: "POST",
+    });
+    // Rehabilita controles y oculta overlay
+    document.getElementById('global-blocker').style.display = 'none';
+    document.querySelectorAll('button, input, textarea, select, a').forEach(el => {
+      el.disabled = false;
+      el.classList.remove('pointer-events-none','opacity-60');
     });
     if (res.ok) {
       const data = await res.json();
@@ -410,17 +423,15 @@
       // Mantener el tamaño de las cajas tras la carga
       if (data && data.funcional) {
         input.value = data.funcional;
-        input.style.height = "150px";
         preview.innerHTML = window.marked.parse(data.funcional, {
           headerIds: false,
         });
-        preview.style.height = "150px";
       }
       alert(
-        "✅ ¡Documento funcional generado con éxito!\nPuedes continuar trabajando en el resto de paneles."
+        "\u2705 \u00a1Documento funcional generado con \u00e9xito!\nPuedes continuar trabajando en el resto de paneles."
       );
     } else {
-      let msg = "Error generando el análisis funcional.";
+      let msg = "Error generando el an\u00e1lisis funcional.";
       try {
         const data = await res.json();
         if (data && data.error) msg = data.error;
@@ -445,7 +456,14 @@
       alert("Error actualizando el documento funcional.");
     }
     updateBtn.disabled = false;
-    updateBtn.textContent = "Actualizar";
+    updateBtn.textContent = "Guardar Cambios";
+    // Si estamos en el panel expandido, sincroniza el texto del botón allí también
+    // Busca el botón expandido si existe
+    const overlay = document.getElementById('markdown-panel-overlay');
+    if (overlay) {
+      const overlayUpdateBtn = overlay.querySelector('#update-funcional');
+      if (overlayUpdateBtn) overlayUpdateBtn.textContent = "Guardar Cambios";
+    }
   };
 
   exportBtn.onclick = async () => {
@@ -467,8 +485,8 @@
   window.goToSection = function (e, sectionTitle) {
     if (e) e.preventDefault();
     const textarea = document.getElementById("markdown-input");
-    const preview = document.getElementById("markdown-preview");
-    if (!textarea) return;
+    const previewDiv = document.getElementById("markdown-preview");
+    if (!textarea || !previewDiv) return;
     const value = textarea.value;
     // Busca el título como encabezado Markdown (## o ###)
     const regex = new RegExp(
@@ -478,23 +496,53 @@
     const match = value.match(regex);
     if (match) {
       const pos = match.index;
-      textarea.focus();
-      textarea.setSelectionRange(pos, pos);
       // Calcula la línea donde está la sección
       const before = value.slice(0, pos);
       const linesBefore = before.split("\n").length - 1;
       // Calcula la altura de línea real
       const style = window.getComputedStyle(textarea);
       const lineHeight = parseFloat(style.lineHeight) || 20;
-      // Calcula el scrollTop para que la línea quede en la primera fila visible
-      textarea.scrollTop = linesBefore * lineHeight;
-      // Resalta la línea en la previsualización y la lleva al tope
+      // Calcula el scrollTop para que la línea quede en la PARTE SUPERIOR del editor
+      textarea.scrollTop = Math.max(0, linesBefore * lineHeight);
+      // Coloca el cursor al inicio de la línea encontrada (sin seleccionarla)
+      const lineStart = before.lastIndexOf("\n") + 1;
+      textarea.setSelectionRange(lineStart, lineStart);
+      textarea.blur(); // Quita el foco para evitar el cursor visible
+      // --- Marcar la línea en el editor (negrita) ---
+      const markClass = 'editor-section-highlight';
+      const valueLines = value.split("\n");
+      const targetLine = linesBefore;
+      let html = '';
+      for (let i = 0; i < valueLines.length; i++) {
+        if (i === targetLine) {
+          html += `<div class="${markClass} whitespace-pre font-bold">${valueLines[i] || '&nbsp;'}</div>`;
+        } else {
+          html += `<div class="whitespace-pre">${valueLines[i] || '&nbsp;'}</div>`;
+        }
+      }
+      let overlay = document.getElementById('markdown-input-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'markdown-input-overlay';
+        overlay.style.position = 'absolute';
+        overlay.style.top = textarea.offsetTop + 'px';
+        overlay.style.left = textarea.offsetLeft + 'px';
+        overlay.style.width = textarea.offsetWidth + 'px';
+        overlay.style.height = textarea.offsetHeight + 'px';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.zIndex = 2;
+        overlay.style.background = 'transparent';
+        overlay.style.overflow = 'hidden';
+        textarea.parentNode.appendChild(overlay);
+      }
+      overlay.innerHTML = `<div style="font: inherit; color: transparent; background: transparent;">${html}</div>`;
+      overlay.scrollTop = textarea.scrollTop;
+      // Resalta la línea en la previsualización y la lleva a la parte superior
       setTimeout(() => {
-        const previewDiv = document.getElementById("markdown-preview");
-        if (!previewDiv) return;
-        previewDiv
-          .querySelectorAll(".section-highlight")
-          .forEach((el) => el.classList.remove("section-highlight"));
+        previewDiv.querySelectorAll(".section-highlight").forEach((el) => {
+          el.classList.remove("section-highlight");
+          el.classList.remove("font-bold");
+        });
         const headers = previewDiv.querySelectorAll("h1, h2, h3, h4, h5, h6");
         for (const h of headers) {
           if (
@@ -502,26 +550,21 @@
             sectionTitle.trim().replace(/\s+/g, " ")
           ) {
             h.classList.add("section-highlight");
-            // Lleva el encabezado al tope del contenedor
-            const container = previewDiv.parentElement;
-            if (container && container.scrollTo) {
-              container.scrollTo({
-                top: h.offsetTop - container.offsetTop,
-                behavior: "smooth",
-              });
-            } else {
-              h.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
+            h.classList.add("font-bold");
+            previewDiv.scrollTo({
+              top: h.offsetTop,
+              behavior: "smooth",
+            });
             break;
           }
         }
       }, 100);
     }
   };
-  // Agrega el estilo para el resaltado
-  const style = document.createElement("style");
-  style.innerHTML = `.section-highlight { background-color: #f3f4f6 !important; border-radius: 0.25rem; padding: 0.1em 0.3em; }`;
-  document.head.appendChild(style);
+  // Agrega el estilo para el resaltado en el editor
+  const style2 = document.createElement("style");
+  style2.innerHTML = `.editor-section-highlight { background-color: transparent !important; border-radius: 0.25rem; font-weight: bold !important; }`;
+  document.head.appendChild(style2);
 </script>
 <script src="/static/expand_markdown_panel_main.js"></script>
 {% endblock %}

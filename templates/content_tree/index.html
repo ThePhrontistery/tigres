@@ -15,7 +15,7 @@
         href="#"
         class="font-semibold text-blue-700 hover:underline"
         data-section-id="{{ node.num }}. {{ node.title }}"
-        onclick="goToSection(event, '{{ node.num }}. {{ node.title }}')"
+        onclick="window.goToSection(event, '{{ node.num }}. {{ node.title }}')"
         >{{ node.num }}. {{ node.title }}</a
       >
       {% if node.children %}
@@ -26,7 +26,7 @@
             href="#"
             class="text-blue-600 hover:underline"
             data-section-id="{{ child.num }} {{ child.title }}"
-            onclick="goToSection(event, '{{ child.num }} {{ child.title }}')"
+            onclick="window.goToSection(event, '{{ child.num }} {{ child.title }}')"
             >{{ child.num }} {{ child.title }}</a
           >
         </li>
@@ -38,28 +38,4 @@
   </ul>
   {% endif %}
 </div>
-<script>
-  function goToSection(e, sectionTitle) {
-    e.preventDefault();
-    // Busca el textarea y mueve el cursor al inicio de la sección
-    const textarea =
-      window.parent.document.getElementById("markdown-input") ||
-      document.getElementById("markdown-input");
-    if (!textarea) return;
-    const value = textarea.value;
-    // Busca el título como encabezado Markdown (## o ###)
-    const regex = new RegExp(
-      `^#+\\s*${sectionTitle.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}`,
-      "m"
-    );
-    const match = value.match(regex);
-    if (match) {
-      const pos = match.index;
-      textarea.focus();
-      textarea.setSelectionRange(pos, pos);
-      // Scroll automático
-      textarea.scrollTop = textarea.scrollHeight * (pos / value.length);
-    }
-  }
-</script>
 {% endblock %}
