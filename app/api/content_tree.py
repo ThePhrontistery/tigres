@@ -32,7 +32,7 @@ async def content_tree_section(request: Request, title: str = Query(...)):
     )
 
 def parse_markdown_headings(md_text: str, max_depth: int = 2) -> List[dict]:
-    """Extrae los encabezados de nivel 1 y 2 de un markdown."""
+    """Extrae los encabezados de nivel 1 y 2 de un markdown. """
     lines = md_text.splitlines()
     tree = []
     current = None
