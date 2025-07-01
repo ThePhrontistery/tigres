@@ -2,14 +2,21 @@
 {% block content %}
 <div class="max-w-2xl mx-auto mt-8 p-4 bg-white rounded shadow">
   <h2 class="text-xl font-bold mb-4">Editor Markdown</h2>
-  <div class="flex flex-col md:flex-row gap-4">
-    <textarea id="markdown-input" class="w-full h-48 p-2 border rounded focus:outline-none focus:ring" placeholder="Escribe en Markdown..."></textarea>
+  <div class="flex flex-col md:flex-row gap-4" id="markdown-panel">
+    <div class="flex flex-col w-full h-48 gap-2">
+      <div class="flex items-center gap-2 mb-2">
+        <button id="expand-panel-btn" type="button" class="px-3 py-1 text-xs font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 transition">Expandir</button>
+        <!-- Aquí puedes añadir más controles si existen -->
+      </div>
+      <textarea id="markdown-input" class="w-full h-full p-2 border rounded focus:outline-none focus:ring" placeholder="Escribe en Markdown..."></textarea>
+    </div>
     <div class="w-full h-48 p-2 border rounded bg-gray-50 overflow-auto">
       <div id="markdown-preview" class="prose prose-sm"></div>
     </div>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="/static/expand_markdown_panel.js"></script>
 <script>
   const input = document.getElementById('markdown-input');
   const preview = document.getElementById('markdown-preview');

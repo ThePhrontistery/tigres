@@ -12,4 +12,11 @@ dependencies = [
     "sqlalchemy>=2.0.41",
     "uvicorn>=0.34.3",
     "python-multipart>=0.0.9",
+    "openai",
+    "python-docx",
+    "PyPDF2",
+    "markdown",
+    "pdfkit",
+    "beautifulsoup4",  # Necesario para exportar a Word interpretando HTML
+    "fpdf2",           # Necesario para exportar a PDF sin librerías nativas
 ]

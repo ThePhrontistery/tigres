@@ -1,31 +1,46 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="max-w-xl mx-auto mt-8 p-4 bg-white rounded shadow">
-  <h2 class="text-xl font-bold mb-4">ChatBot IA</h2>
-  <div class="flex flex-col gap-2">
-    <div id="chat-messages" class="h-48 overflow-y-auto bg-gray-50 p-2 rounded border mb-2"></div>
-    <form id="chat-form" class="flex gap-2">
-      <input id="chat-input" type="text" class="flex-1 border rounded p-2" placeholder="Escribe tu mensaje..." required />
-      <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar</button>
-    </form>
-  </div>
+<div class="max-w-xl mx-auto mt-8 p-4 bg-white rounded shadow flex flex-col h-full">
+  <h2 class="text-xl font-bold mb-4 text-blue-700">ChatBot IA</h2>
+  <div id="chat-messages" class="flex-1 h-48 overflow-y-auto bg-gray-50 p-2 rounded border mb-2"></div>
+  <form id="chat-form" class="flex gap-2 mt-2">
+    <input id="chat-input" name="question" type="text" class="flex-1 border rounded p-2" placeholder="Escribe tu mensaje..." required />
+    <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar</button>
+  </form>
 </div>
 <script>
   const chatForm = document.getElementById('chat-form');
   const chatInput = document.getElementById('chat-input');
   const chatMessages = document.getElementById('chat-messages');
+
+  // Función para obtener el contenido actual del editor Markdown (panel 3)
+  function getMarkdownContent() {
+    // Busca el textarea del editor markdown en la página (puede estar en otro panel)
+    const markdownInput = window.parent.document.getElementById('markdown-input') || document.getElementById('markdown-input');
+    return markdownInput ? markdownInput.value : '';
+  }
+
   chatForm.onsubmit = async (e) => {
     e.preventDefault();
     const msg = chatInput.value.trim();
     if (!msg) return;
     chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
     chatInput.value = '';
-    // Simulación de respuesta IA
     chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
-    setTimeout(() => {
-      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Esta es una respuesta simulada.');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    try {
+      const documentContent = getMarkdownContent();
+      const res = await fetch('/api/chatbot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, document_content: documentContent })
+      });
+      const data = await res.json();
+      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', data.response);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-    }, 1000);
+    } catch (err) {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Error al consultar la IA.');
+    }
   };
 </script>
 {% endblock %}

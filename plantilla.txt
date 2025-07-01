@@ -1,5 +1,29 @@
-Introduction
-Overall Description
-Documentación
-Styles
-Requeriments
+1. Resumen Ejecutivo
+1.1 Objetivos Principales
+
+2. Alcance del Proyecto
+2.1 Qué incluye y qué no incluye el sistema.
+2.2 Público objetivo o usuarios finales.
+
+3. Requisitos Funcionales
+
+4. Requisitos No Funcionales
+4.1 Rendimiento
+4.2 Seguridad
+4.3 Usabilidad
+4.4Compatibilidad
+
+5. Flujos de Usuario / Casos de Uso
+
+6. Interfaces del Sistema
+6.1 Mockups o descripciones de pantallas clave.
+6.2 Integraciones con otros sistemas o APIs.
+
+7. Reglas de Negocio
+7.1 Condiciones específicas que deben cumplirse.
+
+8. Criterios de Aceptación
+8.1 Condiciones mínimas para considerar que una funcionalidad está completa y correcta.
+
+9. Glosario (opcional)
+

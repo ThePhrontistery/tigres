@@ -1,32 +1,81 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="w-screen h-screen min-h-screen min-w-full bg-slate-100 flex flex-col">
+{% extends "base.html" %} {% block content %}
+<div
+  class="w-screen h-screen min-h-screen min-w-full bg-slate-100 flex flex-col"
+>
   <header class="w-full mb-2">
-    <h1 class="text-4xl font-bold text-blue-700 text-center py-6 bg-white shadow">Metasketch</h1>
+    <h1
+      class="text-4xl font-bold text-blue-700 text-center py-6 bg-white shadow"
+    >
+      Metasketch
+    </h1>
   </header>
   <div class="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 p-4">
     <!-- Columna 1: Documentos -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
       <h2 class="text-lg font-bold mb-4">Lista de Documentos</h2>
       <ul id="document-list" class="mb-4 space-y-2 flex-1 overflow-y-auto"></ul>
-      <button id="open-upload-modal" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Select</button>
-      <div id="delete-confirm" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+      <button
+        id="open-upload-modal"
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Subir Documento
+      </button>
+      <button
+        id="generate-funcional"
+        class="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Generar Funcional
+      </button>
+      <div
+        id="delete-confirm"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50"
+      >
         <div class="bg-white p-6 rounded shadow-lg w-80">
-          <h3 class="text-lg font-semibold mb-4 text-red-600">¿Seguro que quieres borrar este documento?</h3>
+          <h3 class="text-lg font-semibold mb-4 text-red-600">
+            ¿Seguro que quieres borrar este documento?
+          </h3>
           <div class="flex justify-end space-x-2">
-            <button id="cancel-delete" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cancelar</button>
-            <button id="confirm-delete" class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Borrar</button>
+            <button
+              id="cancel-delete"
+              class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+            >
+              Cancelar
+            </button>
+            <button
+              id="confirm-delete"
+              class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Borrar
+            </button>
           </div>
         </div>
       </div>
       <!-- Modal de subida -->
-      <div id="upload-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50">
+      <div
+        id="upload-modal"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 hidden z-50"
+      >
         <div class="bg-white p-6 rounded shadow-lg w-80">
           <h3 class="text-lg font-semibold mb-4">Subir Documentos</h3>
-          <input id="file-input" type="file" multiple class="mb-4 block w-full" />
+          <input
+            id="file-input"
+            type="file"
+            multiple
+            class="mb-4 block w-full"
+          />
           <div class="flex justify-end space-x-2">
-            <button id="close-modal" class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400">Cerrar</button>
-            <button id="upload-files" class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600">Upload</button>
+            <button
+              id="close-modal"
+              class="px-3 py-1 bg-gray-300 rounded hover:bg-gray-400"
+            >
+              Cerrar
+            </button>
+            <button
+              id="upload-files"
+              class="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              Upload
+            </button>
           </div>
         </div>
       </div>
@@ -35,122 +84,487 @@
     <!-- Columna 2: Árbol de Contenidos -->
     <section class="bg-white rounded shadow p-4 h-full overflow-y-auto">
       <h2 class="text-lg font-bold mb-4">Árbol de Contenidos</h2>
-      <ul class="pl-4 border-l-2 border-gray-300">
-        <li class="mb-2">
-          <span class="font-semibold">1. Introducción</span>
-          <ul class="pl-4 list-disc">
-            <li>1.1 Objetivo</li>
-            <li>1.2 Alcance</li>
-          </ul>
-        </li>
-        <li class="mb-2">
-          <span class="font-semibold">2. Requerimientos</span>
-          <ul class="pl-4 list-disc">
-            <li>2.1 Funcionales</li>
-            <li>2.2 No Funcionales</li>
-          </ul>
-        </li>
-      </ul>
+      <div
+        id="content-tree-panel-placeholder"
+        class="text-gray-400"
+        style="display: none"
+      >
+        Genera primero el documento funcional para ver el árbol de contenido.
+      </div>
+      <div
+        id="content-tree-panel"
+        hx-get="/api/content-tree"
+        hx-trigger="load"
+        hx-swap="innerHTML"
+        style="display: none"
+      ></div>
     </section>
 
     <!-- Columna 3: Editor Markdown -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
-      <h2 class="text-lg font-bold mb-4">Editor Markdown</h2>
-      <textarea id="markdown-input" class="w-full h-1/2 min-h-[120px] max-h-[200px] p-2 border rounded focus:outline-none focus:ring mb-2" placeholder="Escribe en Markdown..."></textarea>
-      <div class="w-full flex-1 p-2 border rounded bg-gray-50 overflow-auto">
-        <div id="markdown-preview" class="prose prose-sm"></div>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold">Editor Markdown / Previsualización</h2>
+        <button id="expand-panel-btn" type="button" class="px-3 py-1 text-xs font-semibold bg-blue-500 text-white rounded hover:bg-blue-600 transition">Expandir</button>
+      </div>
+      <div id="markdown-panel-content" class="flex-1 flex flex-col gap-2">
+        <div class="flex flex-row gap-4 w-full" id="markdown-panel-inner">
+          <div class="flex-1 flex flex-col">
+            <textarea
+              id="markdown-input"
+              class="w-full h-[600px] p-2 border rounded focus:outline-none focus:ring resize-none overflow-y-auto"
+              placeholder="Escribe en Markdown..."
+            ></textarea>
+          </div>
+          <div class="flex-1 flex flex-col">
+            <div
+              id="markdown-preview"
+              class="prose w-full h-[600px] p-2 border rounded bg-gray-50 overflow-y-auto"
+            ></div>
+          </div>
+        </div>
+        <div class="flex gap-2 mt-4 justify-end">
+          <button
+            id="update-funcional"
+            class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+          >
+            Guardar Cambios
+          </button>
+          <button
+            id="export-funcional"
+            class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Exportar
+          </button>
+        </div>
       </div>
     </section>
 
     <!-- Columna 4: ChatBot IA -->
     <section class="bg-white rounded shadow p-4 flex flex-col h-full">
       <h2 class="text-lg font-bold mb-4">ChatBot IA</h2>
-      <div id="chat-messages" class="flex-1 h-48 overflow-y-auto bg-gray-50 p-2 rounded border mb-2"></div>
+      <div
+        id="chat-messages"
+        class="bg-gray-50 p-2 rounded border mb-2 flex-1 min-h-0 overflow-y-auto"
+        style="max-height: 60vh;"
+      ></div>
       <form id="chat-form" class="flex gap-2 mt-2">
-        <input id="chat-input" type="text" class="flex-1 border rounded p-2" placeholder="Escribe tu mensaje..." required />
-        <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar</button>
+        <input
+          id="chat-input"
+          type="text"
+          class="flex-1 border rounded p-2"
+          placeholder="Escribe tu mensaje..."
+          required
+        />
+        <button
+          class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Enviar
+        </button>
       </form>
     </section>
   </div>
 </div>
 
+<div id="global-blocker" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100vw; height:100vh; background:rgba(255,255,255,0.7); cursor:wait;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2rem;color:#2563eb;">
+    <svg class="animate-spin h-10 w-10 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+    Generando documento funcional...
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
 <script>
-// Panel Documentos
-const openModalBtn = document.getElementById('open-upload-modal');
-const modal = document.getElementById('upload-modal');
-const closeModalBtn = document.getElementById('close-modal');
-openModalBtn.onclick = () => modal.classList.remove('hidden');
-closeModalBtn.onclick = () => modal.classList.add('hidden');
+  // Panel Documentos
+  const openModalBtn = document.getElementById("open-upload-modal");
+  const modal = document.getElementById("upload-modal");
+  const closeModalBtn = document.getElementById("close-modal");
+  openModalBtn.onclick = () => modal.classList.remove("hidden");
+  closeModalBtn.onclick = () => modal.classList.add("hidden");
 
-let fileToDelete = null;
-const confirmModal = document.getElementById('delete-confirm');
-const cancelDeleteBtn = document.getElementById('cancel-delete');
-const confirmDeleteBtn = document.getElementById('confirm-delete');
+  let fileToDelete = null;
+  const confirmModal = document.getElementById("delete-confirm");
+  const cancelDeleteBtn = document.getElementById("cancel-delete");
+  const confirmDeleteBtn = document.getElementById("confirm-delete");
 
-async function loadDocuments() {
-  const res = await fetch('/api/documents/list');
-  const docs = await res.json();
-  const list = document.getElementById('document-list');
-  list.innerHTML = '';
-  if (docs.length === 0) {
-    list.innerHTML = '<li class="text-gray-400">No hay documentos subidos.</li>';
-  } else {
-    docs.forEach(doc => {
-      list.innerHTML += `<li class='border rounded px-2 py-1 flex items-center justify-between'>
+  async function loadDocuments() {
+    const res = await fetch("/api/documents/list");
+    const docs = await res.json();
+    const list = document.getElementById("document-list");
+    list.innerHTML = "";
+    if (docs.length === 0) {
+      list.innerHTML =
+        '<li class="text-gray-400">No hay documentos subidos.</li>';
+    } else {
+      docs.forEach((doc) => {
+        list.innerHTML += `<li class='border rounded px-2 py-1 flex items-center justify-between'>
         <span>${doc}</span>
         <button onclick="showDeleteConfirm('${doc}')" class='ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs'>Borrar</button>
       </li>`;
+      });
+    }
+  }
+  loadDocuments();
+
+  window.showDeleteConfirm = function (filename) {
+    fileToDelete = filename;
+    confirmModal.classList.remove("hidden");
+  };
+  cancelDeleteBtn.onclick = () => {
+    fileToDelete = null;
+    confirmModal.classList.add("hidden");
+  };
+  confirmDeleteBtn.onclick = async () => {
+    if (!fileToDelete) return;
+    await fetch(`/api/documents/${fileToDelete}`, { method: "DELETE" });
+    fileToDelete = null;
+    confirmModal.classList.add("hidden");
+    await loadDocuments();
+  };
+  document.getElementById("upload-files").onclick = async () => {
+    const input = document.getElementById("file-input");
+    if (!input.files.length) return;
+    // Obtener lista de archivos ya cargados
+    const res = await fetch("/api/documents/list");
+    const docs = await res.json();
+    const archivosExistentes = new Set(docs.map((f) => f.toLowerCase()));
+    let repetido = false;
+    for (const file of input.files) {
+      if (archivosExistentes.has(file.name.toLowerCase())) {
+        repetido = true;
+        break;
+      }
+    }
+    if (repetido) {
+      alert("Ya existe un documento con ese nombre. Elige otro archivo.");
+      return;
+    }
+    const formData = new FormData();
+    for (const file of input.files) formData.append("files", file);
+    await fetch("/api/upload", { method: "POST", body: formData });
+    modal.classList.add("hidden");
+    await loadDocuments();
+  };
+  // Panel Markdown
+  const input = document.getElementById("markdown-input");
+  const preview = document.getElementById("markdown-preview");
+  input.addEventListener("input", () => {
+    // Usar marked para convertir markdown a HTML y DOMPurify para sanitizar
+    const rawHtml = window.marked.parse(input.value, { headerIds: false });
+    preview.innerHTML = DOMPurify.sanitize(rawHtml);
+  });
+  // Panel ChatBot
+  const chatForm = document.getElementById("chat-form");
+  const chatInput = document.getElementById("chat-input");
+  const chatMessages = document.getElementById("chat-messages");
+  chatForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+    chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
+    chatInput.value = "";
+    chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
+    // Obtener el contenido actual del editor Markdown
+    const markdownInput = document.getElementById("markdown-input");
+    const documentContent = markdownInput ? markdownInput.value : "";
+    try {
+      const res = await fetch("/api/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: msg,
+          document_content: documentContent,
+        }),
+      });
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          "Error: respuesta inválida del servidor."
+        );
+        return;
+      }
+      if (res.ok && data && typeof data.response === "string") {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          data.response
+        );
+      } else if (data && data.detail) {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          `Error ${res.status}: ${data.detail}`
+        );
+      } else {
+        chatMessages.innerHTML = chatMessages.innerHTML.replace(
+          "Pensando...",
+          `Error ${res.status}: respuesta inesperada de la IA.`
+        );
+      }
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    } catch (err) {
+      chatMessages.innerHTML = chatMessages.innerHTML.replace(
+        "Pensando...",
+        "Error al consultar la IA."
+      );
+    }
+  };
+
+  // Control de visibilidad del árbol de contenido
+  function showContentTreePanel() {
+    document.getElementById("content-tree-panel").style.display = "";
+    document.getElementById("content-tree-panel-placeholder").style.display = "none";
+  }
+  function hideContentTreePanel() {
+    document.getElementById("content-tree-panel").style.display = "none";
+    document.getElementById("content-tree-panel-placeholder").style.display = "";
+  }
+  // Al cargar la página, oculta el árbol si no se ha generado el funcional
+  function checkFuncionalGenerado() {
+    const funcional = document.getElementById("markdown-input").value.trim();
+    if (funcional) {
+      showContentTreePanel();
+    } else {
+      hideContentTreePanel();
+    }
+  }
+  checkFuncionalGenerado();
+  // Cuando se actualiza el editor, volver a comprobar
+  const markdownInput = document.getElementById("markdown-input");
+  if (markdownInput) {
+    markdownInput.addEventListener("input", checkFuncionalGenerado);
+  }
+  // Tras generar el funcional, muestra el árbol
+  const generateBtn2 = document.getElementById("generate-funcional");
+  if (generateBtn2) {
+    generateBtn2.addEventListener("click", function () {
+      // Espera a que termine la generación y luego muestra el árbol
+      const checkFuncional = setInterval(() => {
+        if (localStorage.getItem("funcionalGenerado")) {
+          showContentTreePanel();
+          document
+            .getElementById("content-tree-panel")
+            .dispatchEvent(new Event("load"));
+          clearInterval(checkFuncional);
+        }
+      }, 500);
     });
   }
-}
-loadDocuments();
+  // Cuando se genera el funcional exitosamente, marca la bandera
+  const updateFuncionalFlag = () =>
+    localStorage.setItem("funcionalGenerado", "1");
+  // Hook en el fetch de generación
+  const oldFetch = window.fetch;
+  window.fetch = async function (...args) {
+    const res = await oldFetch.apply(this, args);
+    if (
+      args[0] &&
+      args[0].toString().includes("/api/documents/generate-funcional") &&
+      res.ok
+    ) {
+      updateFuncionalFlag();
+    }
+    return res;
+  };
 
-window.showDeleteConfirm = function(filename) {
-  fileToDelete = filename;
-  confirmModal.classList.remove('hidden');
-};
-cancelDeleteBtn.onclick = () => {
-  fileToDelete = null;
-  confirmModal.classList.add('hidden');
-};
-confirmDeleteBtn.onclick = async () => {
-  if (!fileToDelete) return;
-  await fetch(`/api/documents/${fileToDelete}`, { method: 'DELETE' });
-  fileToDelete = null;
-  confirmModal.classList.add('hidden');
-  await loadDocuments();
-};
-document.getElementById('upload-files').onclick = async () => {
-  const input = document.getElementById('file-input');
-  if (!input.files.length) return;
-  const formData = new FormData();
-  for (const file of input.files) formData.append('files', file);
-  await fetch('/api/upload', { method: 'POST', body: formData });
-  modal.classList.add('hidden');
-  await loadDocuments();
-};
-// Panel Markdown
-const input = document.getElementById('markdown-input');
-const preview = document.getElementById('markdown-preview');
-input.addEventListener('input', () => {
-  preview.innerHTML = window.marked.parse(input.value);
-});
-// Panel ChatBot
-const chatForm = document.getElementById('chat-form');
-const chatInput = document.getElementById('chat-input');
-const chatMessages = document.getElementById('chat-messages');
-chatForm.onsubmit = async (e) => {
-  e.preventDefault();
-  const msg = chatInput.value.trim();
-  if (!msg) return;
-  chatMessages.innerHTML += `<div class='mb-1'><b>Tú:</b> ${msg}</div>`;
-  chatInput.value = '';
-  chatMessages.innerHTML += `<div class='mb-1 text-blue-600'><b>IA:</b> Pensando...</div>`;
-  setTimeout(() => {
-    chatMessages.innerHTML = chatMessages.innerHTML.replace('Pensando...', 'Esta es una respuesta simulada.');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }, 1000);
-};
+  const generateBtn = document.getElementById("generate-funcional");
+  const selectBtn = document.getElementById("open-upload-modal");
+  const updateBtn = document.getElementById("update-funcional");
+  const exportBtn = document.getElementById("export-funcional");
+
+  // Deshabilita botones tras generación
+  function disableDocumentPanelButtons() {
+    selectBtn.disabled = true;
+    generateBtn.disabled = true;
+    selectBtn.classList.add(
+      "bg-blue-300",
+      "hover:bg-blue-300",
+      "cursor-not-allowed"
+    );
+    selectBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+    generateBtn.classList.add(
+      "bg-green-300",
+      "hover:bg-green-300",
+      "cursor-not-allowed"
+    );
+    generateBtn.classList.remove("bg-green-600", "hover:bg-green-700");
+    // Deshabilitar todos los botones de borrar
+    document.querySelectorAll("#document-list button").forEach((btn) => {
+      btn.disabled = true;
+      btn.classList.add("bg-red-300", "hover:bg-red-300", "cursor-not-allowed");
+      btn.classList.remove("bg-red-500", "hover:bg-red-600");
+    });
+  }
+
+  generateBtn.onclick = async () => {
+    // Bloquea toda la pantalla
+    document.getElementById('global-blocker').style.display = '';
+    // Deshabilita todos los controles interactivos
+    document.querySelectorAll('button, input, textarea, select, a').forEach(el => {
+      el.disabled = true;
+      el.classList.add('pointer-events-none','opacity-60');
+    });
+    generateBtn.disabled = true;
+    generateBtn.textContent = "Generando...";
+    const res = await fetch("/api/documents/generate-funcional", {
+      method: "POST",
+    });
+    // Rehabilita controles y oculta overlay
+    document.getElementById('global-blocker').style.display = 'none';
+    document.querySelectorAll('button, input, textarea, select, a').forEach(el => {
+      el.disabled = false;
+      el.classList.remove('pointer-events-none','opacity-60');
+    });
+    if (res.ok) {
+      const data = await res.json();
+      disableDocumentPanelButtons();
+      generateBtn.textContent = "Generar Funcional";
+      // Mantener el tamaño de las cajas tras la carga
+      if (data && data.funcional) {
+        input.value = data.funcional;
+        preview.innerHTML = window.marked.parse(data.funcional, {
+          headerIds: false,
+        });
+      }
+      alert(
+        "\u2705 \u00a1Documento funcional generado con \u00e9xito!\nPuedes continuar trabajando en el resto de paneles."
+      );
+    } else {
+      let msg = "Error generando el an\u00e1lisis funcional.";
+      try {
+        const data = await res.json();
+        if (data && data.error) msg = data.error;
+      } catch (e) {}
+      generateBtn.disabled = false;
+      generateBtn.textContent = "Generar Funcional";
+      alert(msg);
+    }
+  };
+
+  updateBtn.onclick = async () => {
+    updateBtn.disabled = true;
+    updateBtn.textContent = "Actualizando...";
+    const res = await fetch("/api/documents/update-funcional", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content: input.value }),
+    });
+    if (res.ok) {
+      alert("✅ ¡Documento funcional actualizado!");
+    } else {
+      alert("Error actualizando el documento funcional.");
+    }
+    updateBtn.disabled = false;
+    updateBtn.textContent = "Guardar Cambios";
+    // Si estamos en el panel expandido, sincroniza el texto del botón allí también
+    // Busca el botón expandido si existe
+    const overlay = document.getElementById('markdown-panel-overlay');
+    if (overlay) {
+      const overlayUpdateBtn = overlay.querySelector('#update-funcional');
+      if (overlayUpdateBtn) overlayUpdateBtn.textContent = "Guardar Cambios";
+    }
+  };
+
+  exportBtn.onclick = async () => {
+    // Mostrar opciones de exportación
+    const tipo = prompt(
+      '¿Exportar como Word (docx) o PDF? Escribe "word" o "pdf".'
+    );
+    if (!tipo) return;
+    let endpoint = "";
+    if (tipo.toLowerCase() === "word")
+      endpoint = "/api/documents/export-funcional?format=docx";
+    else if (tipo.toLowerCase() === "pdf")
+      endpoint = "/api/documents/export-funcional?format=pdf";
+    else return alert("Formato no soportado.");
+    window.open(endpoint, "_blank");
+  };
+
+  // Sincronización de scroll y resaltado entre editor y previsualización
+  window.goToSection = function (e, sectionTitle) {
+    if (e) e.preventDefault();
+    const textarea = document.getElementById("markdown-input");
+    const previewDiv = document.getElementById("markdown-preview");
+    if (!textarea || !previewDiv) return;
+    const value = textarea.value;
+    // Busca el título como encabezado Markdown (## o ###)
+    const regex = new RegExp(
+      `^#+\\s*${sectionTitle.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}`,
+      "m"
+    );
+    const match = value.match(regex);
+    if (match) {
+      const pos = match.index;
+      // Calcula la línea donde está la sección
+      const before = value.slice(0, pos);
+      const linesBefore = before.split("\n").length - 1;
+      // Calcula la altura de línea real
+      const style = window.getComputedStyle(textarea);
+      const lineHeight = parseFloat(style.lineHeight) || 20;
+      // Calcula el scrollTop para que la línea quede en la PARTE SUPERIOR del editor
+      textarea.scrollTop = Math.max(0, linesBefore * lineHeight);
+      // Coloca el cursor al inicio de la línea encontrada (sin seleccionarla)
+      const lineStart = before.lastIndexOf("\n") + 1;
+      textarea.setSelectionRange(lineStart, lineStart);
+      textarea.blur(); // Quita el foco para evitar el cursor visible
+      // --- Marcar la línea en el editor (negrita) ---
+      const markClass = 'editor-section-highlight';
+      const valueLines = value.split("\n");
+      const targetLine = linesBefore;
+      let html = '';
+      for (let i = 0; i < valueLines.length; i++) {
+        if (i === targetLine) {
+          html += `<div class="${markClass} whitespace-pre font-bold">${valueLines[i] || '&nbsp;'}</div>`;
+        } else {
+          html += `<div class="whitespace-pre">${valueLines[i] || '&nbsp;'}</div>`;
+        }
+      }
+      let overlay = document.getElementById('markdown-input-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'markdown-input-overlay';
+        overlay.style.position = 'absolute';
+        overlay.style.top = textarea.offsetTop + 'px';
+        overlay.style.left = textarea.offsetLeft + 'px';
+        overlay.style.width = textarea.offsetWidth + 'px';
+        overlay.style.height = textarea.offsetHeight + 'px';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.zIndex = 2;
+        overlay.style.background = 'transparent';
+        overlay.style.overflow = 'hidden';
+        textarea.parentNode.appendChild(overlay);
+      }
+      overlay.innerHTML = `<div style="font: inherit; color: transparent; background: transparent;">${html}</div>`;
+      overlay.scrollTop = textarea.scrollTop;
+      // Resalta la línea en la previsualización y la lleva a la parte superior
+      setTimeout(() => {
+        previewDiv.querySelectorAll(".section-highlight").forEach((el) => {
+          el.classList.remove("section-highlight");
+          el.classList.remove("font-bold");
+        });
+        const headers = previewDiv.querySelectorAll("h1, h2, h3, h4, h5, h6");
+        for (const h of headers) {
+          if (
+            h.textContent.trim().replace(/\s+/g, " ") ===
+            sectionTitle.trim().replace(/\s+/g, " ")
+          ) {
+            h.classList.add("section-highlight");
+            h.classList.add("font-bold");
+            previewDiv.scrollTo({
+              top: h.offsetTop,
+              behavior: "smooth",
+            });
+            break;
+          }
+        }
+      }, 100);
+    }
+  };
+  // Agrega el estilo para el resaltado en el editor
+  const style2 = document.createElement("style");
+  style2.innerHTML = `.editor-section-highlight { background-color: transparent !important; border-radius: 0.25rem; font-weight: bold !important; }`;
+  document.head.appendChild(style2);
 </script>
+<script src="/static/expand_markdown_panel_main.js"></script>
 {% endblock %}

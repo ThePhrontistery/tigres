@@ -1,22 +1,41 @@
-{% extends 'base.html' %}
-{% block content %}
-<div class="max-w-xl mx-auto mt-8 p-4 bg-white rounded shadow">
-  <h2 class="text-xl font-bold mb-4">Árbol de Contenidos</h2>
-  <ul class="pl-4 border-l-2 border-gray-300">
+{% extends 'base.html' %} {% block content %}
+<div
+  class="max-w-xl mx-auto mt-4 p-4 bg-white rounded shadow overflow-x-auto overflow-y-auto"
+  style="min-height: 300px; max-height: 645px;"
+>
+  {% if tree|length == 0 %}
+    <div class="text-center text-gray-500 py-8">
+      El índice se muestra cuando haya un <span class="font-semibold text-blue-700">Documento Funcional</span> generado.
+    </div>
+  {% else %}
+  <ul class="pl-4 border-l-2 border-gray-300 min-w-[350px]">
+    {% for node in tree %}
     <li class="mb-2">
-      <span class="font-semibold">1. Introducción</span>
+      <a
+        href="#"
+        class="font-semibold text-blue-700 hover:underline"
+        data-section-id="{{ node.num }}. {{ node.title }}"
+        onclick="window.goToSection(event, '{{ node.num }}. {{ node.title }}')"
+        >{{ node.num }}. {{ node.title }}</a
+      >
+      {% if node.children %}
       <ul class="pl-4 list-disc">
-        <li>1.1 Objetivo</li>
-        <li>1.2 Alcance</li>
+        {% for child in node.children %}
+        <li>
+          <a
+            href="#"
+            class="text-blue-600 hover:underline"
+            data-section-id="{{ child.num }} {{ child.title }}"
+            onclick="window.goToSection(event, '{{ child.num }} {{ child.title }}')"
+            >{{ child.num }} {{ child.title }}</a
+          >
+        </li>
+        {% endfor %}
       </ul>
+      {% endif %}
     </li>
-    <li class="mb-2">
-      <span class="font-semibold">2. Requerimientos</span>
-      <ul class="pl-4 list-disc">
-        <li>2.1 Funcionales</li>
-        <li>2.2 No Funcionales</li>
-      </ul>
-    </li>
+    {% endfor %}
   </ul>
+  {% endif %}
 </div>
 {% endblock %}
