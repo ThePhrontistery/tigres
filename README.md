@@ -1,7 +1,7 @@
 # AI Web Template
 
 Un proyecto base minimalista que combina **FastAPI** (backend Python), **Jinja2** (motor de plantillas HTML), y **HTMX** (interactividad web reactiva), todo gestionado con [uv](https://github.com/astral-sh/uv).
-Incluye además soporte para **TailwindCSS** (estilos modernos) y carga automática de variables de entorno. 
+Incluye además soporte para **TailwindCSS** (estilos modernos) y carga automática de variables de entorno 
 
 ---
 
